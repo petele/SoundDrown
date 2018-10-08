@@ -3,6 +3,7 @@
 class Noise {
   constructor(buttonSelector, context) {
     this.audioContext = context;
+    this.fade = true;
     this.button = document.querySelector(buttonSelector);
     this.connectNoise(this.addGenerator());
   }
@@ -22,20 +23,35 @@ class Noise {
       this.audioContext.resume();
     }
     if (this.gain.gain.value === 0) {
-      this.gain.gain.value = 1;
+      if (this.fade) {
+        this.fadeIn();
+      } else {
+        this.gain.gain.value = 1;
+      }
       this.button.classList.toggle('on', true);
       return;
     }
     this.gain.gain.value = 0;
     this.button.classList.toggle('on', false);
   }
+  fadeIn() {
+    const vol = this.gain.gain.value;
+    if (vol >= 0.95) {
+      return;
+    }
+    this.gain.gain.value = vol + 0.04;
+    setTimeout(() => {
+      this.fadeIn();
+    }, 75);
+  }
 }
 
 class WhiteNoise extends Noise {
-  constructor(buttonSelector, AudioContext, context) {
+  constructor(buttonSelector, context) {
     super(buttonSelector, context);
   }
   addGenerator() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
     AudioContext.prototype.createWhiteNoise = function() {
       const bufferSize = 4096;
       const node = this.createScriptProcessor(bufferSize, 1, 1);
@@ -52,10 +68,11 @@ class WhiteNoise extends Noise {
 }
 
 class PinkNoise extends Noise {
-  constructor(buttonSelector, AudioContext, context) {
+  constructor(buttonSelector, context) {
     super(buttonSelector, context);
   }
   addGenerator() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
     AudioContext.prototype.createPinkNoise = function() {
       const bufferSize = 4096;
       let b0 = 0;
@@ -88,10 +105,11 @@ class PinkNoise extends Noise {
 }
 
 class BrownNoise extends Noise {
-  constructor(buttonSelector, AudioContext, context) {
+  constructor(buttonSelector, context) {
     super(buttonSelector, context);
   }
   addGenerator() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
     AudioContext.prototype.createBrownNoise = function() {
       const bufferSize = 4096;
       let lastOut = 0.0;
@@ -115,6 +133,7 @@ class BinauralNoise extends Noise {
   constructor(buttonSelector, context, opts) {
     super(buttonSelector, context);
     this.opts = opts;
+    this.fade = false;
   }
   addGenerator() {
     return new BinauralBeatJS(this.audioContext, this.opts);
@@ -244,9 +263,9 @@ function initSounds() {
     return;
   }
   const audioContext = new AudioContext();
-  new WhiteNoise('#butWhite', AudioContext, audioContext);
-  new PinkNoise('#butPink', AudioContext, audioContext);
-  new BrownNoise('#butBrown', AudioContext, audioContext);
+  new WhiteNoise('#butWhite', audioContext);
+  new PinkNoise('#butPink', audioContext);
+  new BrownNoise('#butBrown', audioContext);
   new BinauralNoise('#butBinaural', audioContext);
 }
 
