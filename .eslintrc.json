@@ -1,0 +1,25 @@
+{
+  "extends": ["eslint:recommended", "google"],
+  "parserOptions": {
+    "ecmaVersion": 6
+  },
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "plugins": [
+    "html"
+  ],
+  "rules": {
+    "brace-style": "off",
+    "new-cap": ["error", {
+      "capIsNewExceptions": []
+    }],
+
+    "require-jsdoc": "off",
+    "no-console": ["error", { "allow": ["warn", "error"] }]
+  },
+  "globals": {
+    "ga": true
+  }
+}

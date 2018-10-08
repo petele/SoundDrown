@@ -1,0 +1,21 @@
+{
+  "name": "SoundDrown",
+  "short_name": "SoundDrown",
+  "description": "White Noise Generator",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#37474F",
+  "background_color": "#B0BEC5",
+  "icons": [
+    {
+      "src": "images/192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
