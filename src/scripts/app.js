@@ -1,12 +1,29 @@
 'use strict';
 
+const BUFFER_SIZE = 4096;
+
 class Noise {
-  constructor(name, buttonSelector, context) {
+  constructor(name, context, opts = {}) {
+    if (!name) {
+      throw new Error('Missing parameter: name');
+    }
     this.name = name;
+    if (!context) {
+      throw new Error('audioContext not provided');
+    }
     this.audioContext = context;
-    this.button = document.querySelector(buttonSelector);
+    if (opts.buttonSelector) {
+      this.button = document.querySelector(opts.buttonSelector);
+    }
     this.connectNoise(this.addGenerator());
     this.isPlaying = false;
+    this.defaultGain = opts.defaultGain || 0.75;
+    if (opts.gainSelector) {
+      const elem = document.querySelector(opts.gainSelector);
+      elem.addEventListener('change', () => {
+        this.setGain(parseInt(elem.value, 10) / 100);
+      });
+    }
   }
   connectNoise(noise) {
     this.noise = noise;
@@ -14,44 +31,68 @@ class Noise {
     this.gain.gain.value = 0;
     this.noise.connect(this.gain);
     this.gain.connect(this.audioContext.destination);
-    this.button.removeAttribute('disabled');
-    this.button.addEventListener('click', () => {
-      this.toggleNoise();
-    });
+    if (this.button) {
+      this.button.removeAttribute('disabled');
+      this.button.addEventListener('click', () => {
+        this.toggleNoise();
+      });
+    }
   }
-  toggleNoise() {
+  setGain(newGain) {
+    if (newGain < 0 || newGain > 1) {
+      console.error(`setGain failed: ${newGain} out of range.`);
+      return;
+    }
+    this.defaultGain = newGain;
+    if (this.isPlaying) {
+      this.gain.gain.value = newGain;
+    }
+    ga('send', 'event', 'Settings', this.name, 'defaultGain', newGain);
+  }
+  toggleNoise(startPlaying) {
+    if (this.isPlaying === true && startPlaying === true) {
+      // It's already playing, no need to start again
+      return;
+    }
+    if (this.isPlaying === false && startPlaying === false) {
+      // It's not currently playing, no need to stop
+      return;
+    }
     if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();
     }
-    if (this.isPlaying === false) {
-      this.gain.gain.value = 0.75;
+    if (this.isPlaying === false || startPlaying === true) {
+      this.gain.gain.value = this.defaultGain;
       this.isPlaying = true;
+      if (this.button) {
+        this.button.classList.toggle('on', true);
+      }
       this.startedPlayingAt = Date.now();
-      this.button.classList.toggle('on', true);
-      ga('send', 'event', 'StartNoise', this.name);
+      ga('send', 'event', 'Noise', 'start', this.name, null, this.defaultGain);
       return;
     }
     this.gain.gain.value = 0;
     this.isPlaying = false;
+    if (this.button) {
+      this.button.classList.toggle('on', false);
+    }
     const playTime = Math.round((Date.now() - this.startedPlayingAt) / 1000);
     this.startedPlayingAt = 0;
-    ga('send', 'event', 'PlayDuration', this.name, null, playTime);
-    this.button.classList.toggle('on', false);
+    ga('send', 'event', 'Noise', 'duration', this.name, playTime);
   }
 }
 
 class WhiteNoise extends Noise {
-  constructor(buttonSelector, context) {
-    super('WhiteNoise', buttonSelector, context);
+  constructor(context, opts = {}) {
+    super('WhiteNoise', context, opts);
   }
   addGenerator() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     AudioContext.prototype.createWhiteNoise = function() {
-      const bufferSize = 4096;
-      const node = this.createScriptProcessor(bufferSize, 1, 1);
+      const node = this.createScriptProcessor(BUFFER_SIZE, 1, 1);
       node.onaudioprocess = function(e) {
         const output = e.outputBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
+        for (let i = 0; i < BUFFER_SIZE; i++) {
           output[i] = Math.random() * 2 - 1;
         }
       };
@@ -62,13 +103,12 @@ class WhiteNoise extends Noise {
 }
 
 class PinkNoise extends Noise {
-  constructor(buttonSelector, context) {
-    super('PinkNoise', buttonSelector, context);
+  constructor(context, opts = {}) {
+    super('PinkNoise', context, opts);
   }
   addGenerator() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     AudioContext.prototype.createPinkNoise = function() {
-      const bufferSize = 4096;
       let b0 = 0;
       let b1 = 0;
       let b2 = 0;
@@ -76,10 +116,10 @@ class PinkNoise extends Noise {
       let b4 = 0;
       let b5 = 0;
       let b6 = 0;
-      const node = this.createScriptProcessor(bufferSize, 1, 1);
+      const node = this.createScriptProcessor(BUFFER_SIZE, 1, 1);
       node.onaudioprocess = function(e) {
         const output = e.outputBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
+        for (let i = 0; i < BUFFER_SIZE; i++) {
           const white = Math.random() * 2 - 1;
           b0 = 0.99886 * b0 + white * 0.0555179;
           b1 = 0.99332 * b1 + white * 0.0750759;
@@ -99,18 +139,17 @@ class PinkNoise extends Noise {
 }
 
 class BrownNoise extends Noise {
-  constructor(buttonSelector, context) {
-    super('BrownNoise', buttonSelector, context);
+  constructor(context, opts = {}) {
+    super('BrownNoise', context, opts);
   }
   addGenerator() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     AudioContext.prototype.createBrownNoise = function() {
-      const bufferSize = 4096;
       let lastOut = 0.0;
-      const node = this.createScriptProcessor(bufferSize, 1, 1);
+      const node = this.createScriptProcessor(BUFFER_SIZE, 1, 1);
       node.onaudioprocess = function(e) {
         const output = e.outputBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
+        for (let i = 0; i < BUFFER_SIZE; i++) {
           const white = Math.random() * 2 - 1;
           output[i] = (lastOut + (0.02 * white)) / 1.02;
           lastOut = output[i];
@@ -124,9 +163,50 @@ class BrownNoise extends Noise {
 }
 
 class BinauralNoise extends Noise {
-  constructor(buttonSelector, context, opts) {
-    super('BinauralNoise', buttonSelector, context);
+  constructor(context, opts = {}) {
+    super('BinauralNoise', context, opts);
     this.opts = opts;
+    if (opts.pitchSelector) {
+      const elem = document.querySelector(opts.pitchSelector);
+      const min = parseInt(elem.min, 10) || 100;
+      const max = parseInt(elem.max, 10) || 100;
+      elem.addEventListener('change', (evt) => {
+        const value = parseInt(elem.value, 10);
+        if (value < min || value > max) {
+          elem.value = this.noise.pitch;
+          return;
+        }
+        ga('send', 'event', 'Settings', this.name, 'pitch', value);
+        this.noise.setPitch(value);
+      });
+    }
+    if (opts.beatSelector) {
+      const elem = document.querySelector(opts.beatSelector);
+      const min = parseInt(elem.min, 10) || 100;
+      const max = parseInt(elem.max, 10) || 100;
+      elem.addEventListener('change', (evt) => {
+        const value = parseInt(elem.value);
+        if (value < min || value > max) {
+          elem.value = this.noise.beatRate;
+          return;
+        }
+        ga('send', 'event', 'Settings', this.name, 'beatRate', value);
+        this.noise.setBeatRate(value);
+      });
+    }
+    if (opts.waveFormSelector) {
+      const elem = document.querySelector(opts.waveFormSelector);
+      const forms = ['sine', 'square', 'sawtooth', 'triangle'];
+      elem.addEventListener('blur', (evt) => {
+        const value = elem.value.toLowerCase();
+        if (!forms.includes(value)) {
+          elem.value = this.noise.waveType;
+          return;
+        }
+        ga('send', 'event', 'Settings', this.name, value);
+        this.noise.setWaveType(value);
+      });
+    }
   }
   addGenerator() {
     return new BinauralBeatJS(this.audioContext, this.opts);
@@ -249,18 +329,90 @@ class BinauralBeatJS {
   }
 }
 
+const noises = {};
+
 function initSounds() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (!AudioContext) {
     console.error('No Audio Context');
+    ga('send', 'event', 'Error', 'no_audio_context', name);
     return;
   }
   const audioContext = new AudioContext();
-  new WhiteNoise('#butWhite', audioContext);
-  new PinkNoise('#butPink', audioContext);
-  new BrownNoise('#butBrown', audioContext);
-  new BinauralNoise('#butBinaural', audioContext);
+
+  initWhiteNoise(audioContext);
+  initPinkNoise(audioContext);
+  initBrownNoise(audioContext);
+  initBinauralNoise(audioContext);
 }
+
+function initFailed(name, err) {
+  console.error(`Unable to initialize ${name} noise`, err);
+  ga('send', 'event', 'Error', 'init_failed', name);
+}
+
+function initWhiteNoise(audioContext) {
+  noises.white = 'starting';
+  return new Promise((resolve) => {
+    const wnOpts = {buttonSelector: '#butWhite', gainSelector: '#wnGain'};
+    try {
+      noises.white = new WhiteNoise(audioContext, wnOpts);
+      resolve(true);
+      return;
+    } catch (ex) {
+      initFailed('white', ex);
+    }
+  });
+}
+
+function initPinkNoise(audioContext) {
+  noises.pink = 'starting';
+  return new Promise((resolve) => {
+    const pnOpts = {buttonSelector: '#butPink', gainSelector: '#pnGain'};
+    try {
+      noises.pink = new PinkNoise(audioContext, pnOpts);
+      resolve(true);
+      return;
+    } catch (ex) {
+      initFailed('pink', ex);
+    }
+  });
+}
+
+function initBrownNoise(audioContext) {
+  noises.brown = 'starting';
+  return new Promise((resolve) => {
+    const bnOpts = {buttonSelector: '#butBrown', gainSelector: '#bnGain'};
+    try {
+      noises.brown = new BrownNoise(audioContext, bnOpts);
+      resolve(true);
+      return;
+    } catch (ex) {
+      initFailed('brown', ex);
+    }
+  });
+}
+
+function initBinauralNoise(audioContext) {
+  noises.binaural = 'starting';
+  return new Promise((resolve) => {
+    const biOpts = {
+      buttonSelector: '#butBinaural',
+      pitchSelector: '#biPitch',
+      beatSelector: '#biBeat',
+      waveFormSelector: '#biWaveForm',
+      gainSelector: '#biGain',
+    };
+    try {
+      noises.binaural = new BinauralNoise(audioContext, biOpts);
+      resolve(true);
+      return;
+    } catch (ex) {
+      initFailed('binaural', ex);
+    }
+  });
+}
+
 
 function registerServiceWorker() {
   // Load and register pre-caching Service Worker
@@ -276,11 +428,11 @@ function registerServiceWorker() {
 function trackWindowMode() {
   window.addEventListener('load', () => {
     if (window.navigator.standalone === true) {
-      ga('send', 'event', 'WindowMode', 'standalone-ios');
+      ga('send', 'event', 'Started', 'windowType', 'standalone-ios');
     } else if (matchMedia('(display-mode: standalone)').matches === true) {
-      ga('send', 'event', 'WindowMode', 'standalone');
+      ga('send', 'event', 'Started', 'windowType', 'standalone');
     } else {
-      ga('send', 'event', 'WindowMode', 'browser');
+      ga('send', 'event', 'Started', 'windowType', 'browser');
     }
   });
 }
@@ -292,7 +444,7 @@ class PWAInstaller {
     window.addEventListener('beforeinstallprompt', (e) => {
       this.deferredEvent = e;
       this.installButton.classList.toggle('hidden', false);
-      ga('send', 'event', 'InstallPrompt', 'shown');
+      ga('send', 'event', 'InstallButton', 'shown');
     });
     window.addEventListener('appinstalled', (e) => {
       ga('send', 'event', 'InstallEvent', 'installed');
@@ -308,7 +460,7 @@ class PWAInstaller {
         ga('send', 'event', 'InstallPromptResponse', result.outcome);
         this.deferredEvent = null;
       });
-      ga('send', 'event', 'InstallPrompt', 'clicked');
+      ga('send', 'event', 'InstallButton', 'clicked');
     });
   }
   hideButton() {

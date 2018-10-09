@@ -38,14 +38,14 @@
     <meta name="twitter:description" content="White Noise Generator">
     <meta name="twitter:image" content="https://sounddrown.app/images/192.png">
     <meta name="twitter:creator" content="@petele">
-    
+
     <!-- Other sharing -->
     <meta property="og:title" content="SoundDrown">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://sounddrown.app/images/192.png">
     <meta property="og:url" content="https://sounddrown.app/">
     <meta property="og:description" content="White noise generator">
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
     <link href="https://fonts.googleapis.com/css?family=Neucha" rel="stylesheet">
@@ -77,7 +77,7 @@
         -webkit-font-smoothing: antialiased;
       }
       .hidden { display: none; }
-      
+
       header {
         background-color: var(--app-header-bg);
         margin-bottom: 1em;
@@ -89,7 +89,7 @@
         padding: 0.4em;
         margin: 0;
       }
-      
+
       .sound-container {
         display: flex;
         flex-direction: row;
@@ -116,6 +116,10 @@
       }
       .sound-container button.on svg {
         fill: var(--app-button-on);
+      }
+
+      .settings-container {
+        display:none;
       }
 
       .install-container {
@@ -188,6 +192,46 @@
         </svg>
         Binaural
       </button>
+    </div>
+
+    <div class="settings-container">
+      <div class="white-settings">
+        <div>
+          <label for="wnGain">White Noise Gain</label>
+          <input id="wnGain" type="number" required value="75" min="1" max="100">
+        </div>
+      </div>
+      <div class="pink-settings">
+        <div>
+          <label for="pnGain">Pink Noise Gain</label>
+          <input id="pnGain" type="number" required value="75" min="1" max="100">
+        </div>
+      </div>
+      <div class="brown-settings">
+        <div>
+          <label for="bnGain">Brown Noise Gain</label>
+          <input id="bnGain" type="number" required value="75" min="1" max="100">
+        </div>
+      </div>
+      <div class="binaural-settings">
+        <div>
+          <label for="biGain">Binaural Noise Gain</label>
+          <input id="biGain" type="number" required value="75" min="1" max="100">
+        </div>
+      </div>
+        <div>
+          <label for="biPitch">Pitch</label>
+          <input id="biPitch" type="number" required value="420" min="20" max="750" step="1">
+        </div>
+        <div>
+          <label for="biBeat">Beat</label>
+          <input id="biBeat" type="number" required value="5" min="1" max="100" step="1">
+        </div>
+        <div>
+          <label for="biWaveForm">Wave Form</label>
+          <input id="biWaveForm" type="text" required value="sine">
+        </div>
+      </div>
     </div>
 
     <div class="install-container">
