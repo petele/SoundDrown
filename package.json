@@ -17,9 +17,11 @@
     "gulp-autoprefixer": "^6.0.0",
     "gulp-babel": "^8.0.0",
     "gulp-copy": "^4.0.0",
+    "gulp-csso": "^3.0.1",
     "gulp-htmlmin": "^5.0.1",
     "gulp-inline-source": "^3.2.0",
     "gulp-replace": "^1.0.0",
+    "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify": "^3.0.1",
     "run-sequence": "^2.2.1",
     "workbox-build": "^3.6.2"
