@@ -62,7 +62,7 @@
         --app-header-bg: var(--blue-gray-800);
         --app-header-color: var(--gray-50);
         --app-body-bg: var(--blue-gray-600);
-        --app-button-off: var(--blue-gray-100);
+        --app-button-off: var(--gray-50);
         --app-button-on: var(--gray-50);
         --app-button-on-bg: var(--blue-gray-700);
       }
@@ -82,7 +82,6 @@
 
       header h1 {
         font-family: 'Neucha', cursive, serif;
-        font-display: swap;
         color: white;
         text-align: center;
         padding: 0.4em;
@@ -139,6 +138,15 @@
         padding: 0.75em;
       }
 
+      .version-container {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 0.4em;
+        color: var(--app-button-on);
+      }
+
     </style>
   </head>
   <body>
@@ -188,7 +196,21 @@
       <button id="butInstall" class="hidden" type="button">Install</button>
     </div>
 
-    <script src="/scripts/app.js" defer async></script>
+    <div class="version-container">
+      <small>Build Date: [[BUILD_DATE]]</small>
+    </div>
+
+    <script src="/scripts/app.js" async></script>
+    <!-- Google Analytics -->
+    <script>
+    /* eslint-disable */
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-9988000-28', 'auto');
+    ga('send', 'pageview', '/');
+    /* eslint-enable */
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+    <!-- End Google Analytics -->
 
   </body>
 </html>
