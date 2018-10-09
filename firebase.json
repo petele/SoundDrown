@@ -1,6 +1,9 @@
 {
   "hosting": {
     "public": "build/",
+    "ignore": [
+      "maps/**"
+    ],
     "headers": [
       {
         "source": "/index.html",

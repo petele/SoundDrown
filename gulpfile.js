@@ -49,12 +49,18 @@ gulp.task('css-build', () => {
 });
 
 gulp.task('js-build', () => {
-  return gulp.src(`${SRC_DIR}/scripts/app.js`)
+  const uglifyOpts = {
+    compress: {
+      drop_console: true,
+      warnings: true,
+    }
+  };
+  return gulp.src(`${SRC_DIR}/scripts/*.js`)
       .pipe(sourcemaps.init())
       .pipe(babel({
         presets: ['@babel/env'],
       }))
-      .pipe(uglify())
+      .pipe(uglify(uglifyOpts))
       .pipe(sourcemaps.write(`../maps/`))
       .pipe(gulp.dest(`${TEMP_DIR}/scripts`));
 });

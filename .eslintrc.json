@@ -12,9 +12,10 @@
   ],
   "rules": {
     "require-jsdoc": "warn",
-    "no-console": ["error", { "allow": ["warn", "error"] }]
+    "no-console": 0
   },
   "globals": {
-    "ga": true
+    "ga": true,
+    "gaEvent": true
   }
 }
