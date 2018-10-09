@@ -23,15 +23,19 @@ class Noise {
     if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();
     }
-    if (this.gain.gain.value === 0) {
+    if (this.isPlaying === false) {
       this.gain.gain.value = 0.75;
       this.isPlaying = true;
+      this.startedPlayingAt = Date.now();
       this.button.classList.toggle('on', true);
       ga('send', 'event', 'StartNoise', this.name);
       return;
     }
     this.gain.gain.value = 0;
     this.isPlaying = false;
+    const playTime = Math.round((Date.now() - this.startedPlayingAt) / 1000);
+    this.startedPlayingAt = 0;
+    ga('send', 'event', 'PlayDuration', this.name, null, playTime);
     this.button.classList.toggle('on', false);
   }
 }
