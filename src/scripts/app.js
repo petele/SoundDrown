@@ -1,11 +1,12 @@
 'use strict';
 
 class Noise {
-  constructor(buttonSelector, context) {
+  constructor(name, buttonSelector, context) {
+    this.name = name;
     this.audioContext = context;
-    this.fade = true;
     this.button = document.querySelector(buttonSelector);
     this.connectNoise(this.addGenerator());
+    this.isPlaying = false;
   }
   connectNoise(noise) {
     this.noise = noise;
@@ -23,32 +24,21 @@ class Noise {
       this.audioContext.resume();
     }
     if (this.gain.gain.value === 0) {
-      if (this.fade) {
-        this.fadeIn();
-      } else {
-        this.gain.gain.value = 1;
-      }
+      this.gain.gain.value = 0.75;
+      this.isPlaying = true;
       this.button.classList.toggle('on', true);
+      ga('send', 'event', 'StartNoise', this.name);
       return;
     }
     this.gain.gain.value = 0;
+    this.isPlaying = false;
     this.button.classList.toggle('on', false);
-  }
-  fadeIn() {
-    const vol = this.gain.gain.value;
-    if (vol >= 0.95) {
-      return;
-    }
-    this.gain.gain.value = vol + 0.04;
-    setTimeout(() => {
-      this.fadeIn();
-    }, 75);
   }
 }
 
 class WhiteNoise extends Noise {
   constructor(buttonSelector, context) {
-    super(buttonSelector, context);
+    super('WhiteNoise', buttonSelector, context);
   }
   addGenerator() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -69,7 +59,7 @@ class WhiteNoise extends Noise {
 
 class PinkNoise extends Noise {
   constructor(buttonSelector, context) {
-    super(buttonSelector, context);
+    super('PinkNoise', buttonSelector, context);
   }
   addGenerator() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -106,7 +96,7 @@ class PinkNoise extends Noise {
 
 class BrownNoise extends Noise {
   constructor(buttonSelector, context) {
-    super(buttonSelector, context);
+    super('BrownNoise', buttonSelector, context);
   }
   addGenerator() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -131,9 +121,8 @@ class BrownNoise extends Noise {
 
 class BinauralNoise extends Noise {
   constructor(buttonSelector, context, opts) {
-    super(buttonSelector, context);
+    super('BinauralNoise', buttonSelector, context);
     this.opts = opts;
-    this.fade = false;
   }
   addGenerator() {
     return new BinauralBeatJS(this.audioContext, this.opts);
@@ -280,6 +269,18 @@ function registerServiceWorker() {
   }
 }
 
+function trackWindowMode() {
+  window.addEventListener('load', () => {
+    if (window.navigator.standalone === true) {
+      ga('send', 'event', 'WindowMode', 'standalone-ios');
+    } else if (matchMedia('(display-mode: standalone)').matches === true) {
+      ga('send', 'event', 'WindowMode', 'standalone');
+    } else {
+      ga('send', 'event', 'WindowMode', 'browser');
+    }
+  });
+}
+
 class PWAInstaller {
   constructor(buttonSelector) {
     this.deferredEvent;
@@ -287,10 +288,10 @@ class PWAInstaller {
     window.addEventListener('beforeinstallprompt', (e) => {
       this.deferredEvent = e;
       this.installButton.classList.toggle('hidden', false);
+      ga('send', 'event', 'InstallPrompt', 'shown');
     });
     window.addEventListener('appinstalled', (e) => {
-      // eslint-disable-next-line no-console
-      console.log('App Installed', e);
+      ga('send', 'event', 'InstallEvent', 'installed');
       this.hideButton();
     });
     this.installButton.addEventListener('click', (e) => {
@@ -300,10 +301,10 @@ class PWAInstaller {
       }
       this.deferredEvent.prompt();
       this.deferredEvent.userChoice.then((result) => {
-        // eslint-disable-next-line no-console
-        console.log('userChoice', result);
+        ga('send', 'event', 'InstallPromptResponse', result.outcome);
         this.deferredEvent = null;
       });
+      ga('send', 'event', 'InstallPrompt', 'clicked');
     });
   }
   hideButton() {
@@ -314,3 +315,4 @@ class PWAInstaller {
 initSounds();
 registerServiceWorker();
 new PWAInstaller('#butInstall');
+trackWindowMode();
