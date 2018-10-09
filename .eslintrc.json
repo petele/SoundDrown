@@ -11,12 +11,7 @@
     "html"
   ],
   "rules": {
-    "brace-style": "off",
-    "new-cap": ["error", {
-      "capIsNewExceptions": []
-    }],
-
-    "require-jsdoc": "off",
+    "require-jsdoc": "warn",
     "no-console": ["error", { "allow": ["warn", "error"] }]
   },
   "globals": {
