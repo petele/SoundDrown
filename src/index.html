@@ -4,10 +4,17 @@
     <meta charset="utf-8">
     <title>SoundDrown</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Pre-connect to font server -->
+    <link rel="preconnect" href="https://fonts.gstatic.com/">
+
+    <!-- SEO description and info -->
     <meta name="description" content="White Noise Generator">
-    <link rel="icon" href="/images/favicon.ico">
     <link rel="canonical" href="https://sounddrown.app/">
+
+    <!-- Manifest and icons -->
     <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/images/favicon.ico">
     <meta name="theme-color" content="#37474F">
 
     <!-- Add to homescreen for Chrome on Android. -->
@@ -46,8 +53,13 @@
     <meta property="og:url" content="https://sounddrown.app/">
     <meta property="og:description" content="White noise generator">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com/">
+    <script>
+      /* eslint-disable */
+      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+      ga('create', 'UA-9988000-28', 'auto');
+      /* esline-enable */
+    </script>
+    <script src="/scripts/perf-observer.js" inline></script>
 
     <!-- Styles -->
     <link rel="stylesheet" href="/styles/styles.css" inline>
@@ -148,11 +160,7 @@
 
     <!-- Google Analytics -->
     <script>
-    /* eslint-disable */
-    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-    ga("create", "UA-9988000-28", "auto");
-    ga("send", "pageview", "/");
-    /* eslint-enable */
+
     </script>
     <script async src="https://www.google-analytics.com/analytics.js"></script>
     <!-- End Google Analytics -->

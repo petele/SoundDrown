@@ -33,8 +33,16 @@ class Noise {
     this.gain.connect(this.audioContext.destination);
     if (this.button) {
       this.button.removeAttribute('disabled');
-      this.button.addEventListener('click', () => {
+      this.button.addEventListener('click', (e) => {
+        let lag;
+        if ('performance' in window) {
+          lag = Math.round(performance.now() - e.timeStamp);
+        }
         this.toggleNoise();
+        if (lag && lag > 100) {
+          const label = `${this.name}:click`;
+          gaEvent('Performance Metrics', 'input-latency', label, lag, true);
+        }
       });
     }
   }
@@ -47,7 +55,7 @@ class Noise {
     if (this.isPlaying) {
       this.gain.gain.value = newGain;
     }
-    ga('send', 'event', 'Settings', this.name, 'defaultGain', newGain);
+    gaEvent('Settings', this.name, 'defaultGain', Math.round(newGain * 100));
   }
   toggleNoise(startPlaying) {
     if (this.isPlaying === true && startPlaying === true) {
@@ -68,7 +76,7 @@ class Noise {
         this.button.classList.toggle('on', true);
       }
       this.startedPlayingAt = Date.now();
-      ga('send', 'event', 'Noise', 'start', this.name, null, this.defaultGain);
+      gaEvent('Noise', 'start', this.name);
       return;
     }
     this.gain.gain.value = 0;
@@ -78,7 +86,7 @@ class Noise {
     }
     const playTime = Math.round((Date.now() - this.startedPlayingAt) / 1000);
     this.startedPlayingAt = 0;
-    ga('send', 'event', 'Noise', 'duration', this.name, playTime);
+    gaEvent('Noise', 'duration', this.name, playTime);
   }
 }
 
@@ -176,7 +184,7 @@ class BinauralNoise extends Noise {
           elem.value = this.noise.pitch;
           return;
         }
-        ga('send', 'event', 'Settings', this.name, 'pitch', value);
+        gaEvent('Settings', this.name, 'pitch', value);
         this.noise.setPitch(value);
       });
     }
@@ -190,7 +198,7 @@ class BinauralNoise extends Noise {
           elem.value = this.noise.beatRate;
           return;
         }
-        ga('send', 'event', 'Settings', this.name, 'beatRate', value);
+        gaEvent('Settings', this.name, 'beatRate', value);
         this.noise.setBeatRate(value);
       });
     }
@@ -203,7 +211,7 @@ class BinauralNoise extends Noise {
           elem.value = this.noise.waveType;
           return;
         }
-        ga('send', 'event', 'Settings', this.name, value);
+        gaEvent('Settings', this.name, value);
         this.noise.setWaveType(value);
       });
     }
@@ -335,20 +343,27 @@ function initSounds() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (!AudioContext) {
     console.error('No Audio Context');
-    ga('send', 'event', 'Error', 'no_audio_context', name);
+    gaEvent('Error', 'no_audio_context');
     return;
   }
   const audioContext = new AudioContext();
 
-  initWhiteNoise(audioContext);
-  initPinkNoise(audioContext);
-  initBrownNoise(audioContext);
-  initBinauralNoise(audioContext);
+  const promises = [];
+  promises.push(initWhiteNoise(audioContext));
+  promises.push(initPinkNoise(audioContext));
+  promises.push(initBrownNoise(audioContext));
+  promises.push(initBinauralNoise(audioContext));
+  Promise.all(promises).then(() => {
+    if ('performance' in window) {
+      const pNow = Math.round(performance.now());
+      gaEvent('Performance Metrics', 'sounds-ready', null, pNow, true);
+    }
+  });
 }
 
 function initFailed(name, err) {
   console.error(`Unable to initialize ${name} noise`, err);
-  ga('send', 'event', 'Error', 'init_failed', name);
+  gaEvent('Error', 'init_failed', name);
 }
 
 function initWhiteNoise(audioContext) {
@@ -361,6 +376,7 @@ function initWhiteNoise(audioContext) {
       return;
     } catch (ex) {
       initFailed('white', ex);
+      resolve(false);
     }
   });
 }
@@ -375,6 +391,7 @@ function initPinkNoise(audioContext) {
       return;
     } catch (ex) {
       initFailed('pink', ex);
+      resolve(false);
     }
   });
 }
@@ -389,6 +406,7 @@ function initBrownNoise(audioContext) {
       return;
     } catch (ex) {
       initFailed('brown', ex);
+      resolve(false);
     }
   });
 }
@@ -409,6 +427,7 @@ function initBinauralNoise(audioContext) {
       return;
     } catch (ex) {
       initFailed('binaural', ex);
+      resolve(false);
     }
   });
 }
@@ -416,12 +435,14 @@ function initBinauralNoise(audioContext) {
 function trackWindowMode() {
   setTimeout(() => {
     if (window.navigator.standalone === true) {
-      ga('send', 'event', 'Started', 'windowType', 'standalone-ios');
-    } else if (matchMedia('(display-mode: standalone)').matches === true) {
-      ga('send', 'event', 'Started', 'windowType', 'standalone');
-    } else {
-      ga('send', 'event', 'Started', 'windowType', 'browser');
+      gaEvent('Window Style', 'standalone-ios');
+      return;
     }
+    if (matchMedia('(display-mode: standalone)').matches === true) {
+      gaEvent('Window Style', 'standalone');
+      return;
+    }
+    gaEvent('Window Style', 'browser');
   }, 5000);
 }
 
@@ -432,10 +453,10 @@ class PWAInstaller {
     window.addEventListener('beforeinstallprompt', (e) => {
       this.deferredEvent = e;
       this.installButton.classList.toggle('hidden', false);
-      ga('send', 'event', 'InstallButton', 'shown');
+      gaEvent('InstallButton', 'shown');
     });
     window.addEventListener('appinstalled', (e) => {
-      ga('send', 'event', 'InstallEvent', 'installed');
+      gaEvent('InstallEvent', 'installed');
       this.hideButton();
     });
     this.installButton.addEventListener('click', (e) => {
@@ -445,10 +466,10 @@ class PWAInstaller {
       }
       this.deferredEvent.prompt();
       this.deferredEvent.userChoice.then((result) => {
-        ga('send', 'event', 'InstallPromptResponse', result.outcome);
+        gaEvent('InstallPromptResponse', result.outcome);
         this.deferredEvent = null;
       });
-      ga('send', 'event', 'InstallButton', 'clicked');
+      gaEvent('InstallButton', 'clicked');
     });
   }
   hideButton() {
@@ -465,4 +486,9 @@ window.addEventListener('load', () => {
       scope: '/',
     });
   }
+  if ('performance' in window) {
+    const pNow = Math.round(performance.now());
+    gaEvent('Performance Metrics', 'load', null, pNow);
+  }
 });
+ga('send', 'pageview', '/');
