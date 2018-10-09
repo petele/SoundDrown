@@ -6,5 +6,6 @@ scratch/
 .DS_Store
 package-lock.json
 
+.log
 .tmp
 .sass-cache
