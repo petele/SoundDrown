@@ -2,6 +2,7 @@ build/
 bower_components/
 node_modules/
 scratch/
+.firebase/
 
 .DS_Store
 package-lock.json

@@ -1,6 +1,6 @@
 'use strict';
 
-const BUFFER_SIZE = 4096;
+const BUFFER_SIZE = 1024 * 1;
 
 class Noise {
   constructor(name, context, opts = {}) {
