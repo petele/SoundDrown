@@ -54,7 +54,7 @@ gulp.task('generate-service-worker', () => {
   return workbox.generateSW({
     globDirectory: BUILD_DIR,
     globPatterns: [
-      '**/*.{html,js,png}',
+      '**/*.{html,js,png,ico}',
     ],
     swDest: `${BUILD_DIR}/service-worker.js`,
     clientsClaim: true,
