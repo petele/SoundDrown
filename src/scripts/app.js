@@ -413,20 +413,8 @@ function initBinauralNoise(audioContext) {
   });
 }
 
-
-function registerServiceWorker() {
-  // Load and register pre-caching Service Worker
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js', {
-        scope: '/',
-      });
-    });
-  }
-}
-
 function trackWindowMode() {
-  window.addEventListener('load', () => {
+  setTimeout(() => {
     if (window.navigator.standalone === true) {
       ga('send', 'event', 'Started', 'windowType', 'standalone-ios');
     } else if (matchMedia('(display-mode: standalone)').matches === true) {
@@ -434,7 +422,7 @@ function trackWindowMode() {
     } else {
       ga('send', 'event', 'Started', 'windowType', 'browser');
     }
-  });
+  }, 5000);
 }
 
 class PWAInstaller {
@@ -468,7 +456,13 @@ class PWAInstaller {
   }
 }
 
-initSounds();
-registerServiceWorker();
-new PWAInstaller('#butInstall');
-trackWindowMode();
+window.addEventListener('load', () => {
+  new PWAInstaller('#butInstall');
+  initSounds();
+  trackWindowMode();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js', {
+      scope: '/',
+    });
+  }
+});
