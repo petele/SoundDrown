@@ -47,109 +47,11 @@
     <meta property="og:description" content="White noise generator">
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
-    <link href="https://fonts.googleapis.com/css?family=Neucha" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com/">
 
     <!-- Styles -->
-    <style>
-      body, html { margin: 0; padding: 0; }
-      html {
-        --blue-gray-800: #37474F;
-        --blue-gray-700: #455A64;
-        --blue-gray-600: #546E7A;
-        --blue-gray-500: #607D8B;
-        --blue-gray-200: #B0BEC5;
-        --blue-gray-100: #CFD8DC;
-        --blue-gray-50: #ECEFF1;
-        --gray-50: #FAFAFA;
-        --app-header-bg: var(--blue-gray-800);
-        --app-header-color: var(--gray-50);
-        --app-body-bg: var(--blue-gray-600);
-        --app-button-off: var(--gray-50);
-        --app-button-on: var(--gray-50);
-        --app-button-on-bg: var(--blue-gray-700);
-      }
-      body {
-        background-color: var(--app-body-bg);
-        font-family: Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-        line-height: 1.5;
-        min-height: 100vh;
-        -webkit-font-smoothing: antialiased;
-      }
-      .hidden { display: none; }
+    <link rel="stylesheet" href="/styles/styles.css" inline>
 
-      header {
-        background-color: var(--app-header-bg);
-        margin-bottom: 1em;
-      }
-      header h1 {
-        font-family: "Neucha", cursive, serif;
-        color: white;
-        text-align: center;
-        padding: 0.4em;
-        margin: 0;
-      }
-
-      .sound-container {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .sound-container button {
-        border: none;
-        font-size: 1rem;
-        cursor: pointer;
-        width: 150px;
-        background-color: inherit;
-        color: var(--app-button-off);
-      }
-      .sound-container button[disabled] {
-        opacity: 0.5;
-      }
-      .sound-container button svg {
-        fill: var(--app-button-off);
-      }
-      .sound-container button.on {
-        color: var(--app-button-on);
-        background-color: var(--app-button-on-bg);
-      }
-      .sound-container button.on svg {
-        fill: var(--app-button-on);
-      }
-
-      .settings-container {
-        display:none;
-      }
-
-      .install-container {
-        display: flex;
-        justify-content: center;
-        position: absolute;
-        bottom: 1em;
-        width: 100%;
-      }
-      #butInstall {
-        border: 1px solid white;
-        color: var(--app-button-on);
-        font-size: 1em;
-        background-color: inherit;
-        padding: 0.75em;
-      }
-
-      .version-container {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        text-align: center;
-        font-size: 0.4em;
-        color: var(--app-button-on);
-      }
-      .version-container a {
-        color: var(--app-button-on);
-        text-decoration: none;
-      }
-    </style>
   </head>
   <body>
 
@@ -240,7 +142,7 @@
 
     <div class="version-container">
       <small>
-        <a href="https://github.com/petele/SoundDrown">Build Date: [[BUILD_DATE]]</a>
+        <a href="#">Build Date: [[BUILD_DATE]]</a>
       </small>
     </div>
 
@@ -254,6 +156,6 @@
     </script>
     <script async src="https://www.google-analytics.com/analytics.js"></script>
     <!-- End Google Analytics -->
-    <script src="/scripts/app.js" inline></script>
+    <script src="/scripts/app.js" async inline></script>
   </body>
 </html>

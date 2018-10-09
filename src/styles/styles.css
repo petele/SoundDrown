@@ -1,0 +1,118 @@
+@font-face {
+  font-family: 'Pacifico';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Pacifico Regular'), local('Pacifico-Regular'), url(https://fonts.gstatic.com/s/pacifico/v12/Q_Z9mv4hySLTMoMjnk_rCXYhjbSpvc47ee6xR_80Hnw.woff2) format('woff2');
+  font-display: swap;
+}
+
+html {
+  --blue-gray-800: #37474F;
+  --blue-gray-700: #455A64;
+  --blue-gray-600: #546E7A;
+  --blue-gray-500: #607D8B;
+  --blue-gray-200: #B0BEC5;
+  --blue-gray-100: #CFD8DC;
+  --blue-gray-50: #ECEFF1;
+  --gray-50: #FAFAFA;
+  --app-header-bg: var(--blue-gray-800);
+  --app-header-color: var(--gray-50);
+  --app-body-bg: var(--blue-gray-600);
+  --app-button-off: var(--gray-50);
+  --app-button-on: var(--gray-50);
+  --app-button-on-bg: var(--blue-gray-700);
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--app-body-bg);
+  font-family: Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.hidden { display: none; }
+
+header {
+  background-color: var(--app-header-bg);
+  margin-bottom: 1em;
+}
+
+header h1 {
+  font-family: "Pacifico", cursive, serif;
+  color: white;
+  text-align: center;
+  padding: 0.4em;
+  margin: 0;
+}
+
+.sound-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.sound-container button {
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 150px;
+  background-color: inherit;
+  color: var(--app-button-off);
+}
+
+.sound-container button[disabled] {
+  opacity: 0.5;
+}
+
+.sound-container button svg {
+  fill: var(--app-button-off);
+}
+
+.sound-container button.on {
+  color: var(--app-button-on);
+  background-color: var(--app-button-on-bg);
+}
+
+.sound-container button.on svg {
+  fill: var(--app-button-on);
+}
+
+.settings-container {
+  display:none;
+}
+
+.install-container {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  bottom: 1em;
+  width: 100%;
+}
+
+.install-container button {
+  border: 1px solid white;
+  color: var(--app-button-on);
+  font-size: 1em;
+  background-color: inherit;
+  padding: 0.75em;
+}
+
+.version-container {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 0.4em;
+  color: var(--app-button-on);
+}
+.version-container a {
+  color: var(--app-button-on);
+  text-decoration: none;
+}
