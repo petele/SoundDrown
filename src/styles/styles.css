@@ -76,8 +76,8 @@ header h1 {
 .dialog {
   box-sizing: border-box;
   outline: none;
-  width: 60%;
-  max-width: 450px;
+  width: 425px;
+  max-width: 80%;
   background-color: white;
   z-index: 1500;
   padding: 1em;
@@ -101,6 +101,7 @@ header h1 {
   font-size: 1rem;
   color: var(--app-dialog-button);
   text-transform: uppercase;
+  background-color: inherit;
 }
 
 .sound-container {
