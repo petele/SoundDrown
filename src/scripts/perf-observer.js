@@ -1,5 +1,5 @@
 function gaEvent(category, action, label, value, nonInteraction) {
-  console.log('event', category, action, label, value);
+  console.log('🦄', category, action, label, value);
   if (location.hostname === 'localhost') {
     return;
   }

@@ -16,6 +16,8 @@
   },
   "globals": {
     "ga": true,
-    "gaEvent": true
+    "gaEvent": true,
+    "BinauralBeatJS": true,
+    "MediaMetadata": true
   }
 }
