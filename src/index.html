@@ -82,69 +82,31 @@
     </header>
 
     <div class="sound-container">
-      <button disabled id="butWhite" type="button">
-        <svg viewBox="0 0 100 100">
-          <use xlink:href="#icon-wave"></use>
-        </svg>
-        White
-      </button>
-      <button disabled id="butPink" type="button">
-        <svg viewBox="0 0 100 100">
-          <use xlink:href="#icon-wave"></use>
-        </svg>
-        Pink
-      </button>
-      <button disabled id="butBrown" type="button">
-        <svg viewBox="0 0 100 100">
-          <use xlink:href="#icon-wave"></use>
-        </svg>
-        Brown
-      </button>
-      <button disabled id="butBinaural" type="button">
-        <svg viewBox="0 0 100 100">
-          <use xlink:href="#icon-wave"></use>
-        </svg>
-        Binaural
-      </button>
-    </div>
-
-    <div class="settings-container">
-      <div class="white-settings">
-        <div>
-          <label for="wnGain">White Noise Gain</label>
-          <input id="wnGain" type="number" required value="75" min="1" max="100">
-        </div>
-      </div>
-      <div class="pink-settings">
-        <div>
-          <label for="pnGain">Pink Noise Gain</label>
-          <input id="pnGain" type="number" required value="75" min="1" max="100">
-        </div>
-      </div>
-      <div class="brown-settings">
-        <div>
-          <label for="bnGain">Brown Noise Gain</label>
-          <input id="bnGain" type="number" required value="75" min="1" max="100">
-        </div>
-      </div>
-      <div class="binaural-settings">
-        <div>
-          <label for="biGain">Binaural Noise Gain</label>
-          <input id="biGain" type="number" required value="75" min="1" max="100">
-        </div>
-      </div>
-        <div>
-          <label for="biPitch">Pitch</label>
-          <input id="biPitch" type="number" required value="420" min="20" max="750" step="1">
-        </div>
-        <div>
-          <label for="biBeat">Beat</label>
-          <input id="biBeat" type="number" required value="5" min="1" max="100" step="1">
-        </div>
-        <div>
-          <label for="biWaveForm">Wave Form</label>
-          <input id="biWaveForm" type="text" required value="sine">
-        </div>
+      <div class="sound-container-inner">
+        <button disabled id="butWhite" type="button">
+          <svg viewBox="0 0 100 100">
+            <use xlink:href="#icon-wave"></use>
+          </svg>
+          White
+        </button>
+        <button disabled id="butPink" type="button">
+          <svg viewBox="0 0 100 100">
+            <use xlink:href="#icon-wave"></use>
+          </svg>
+          Pink
+        </button>
+        <button disabled id="butBrown" type="button">
+          <svg viewBox="0 0 100 100">
+            <use xlink:href="#icon-wave"></use>
+          </svg>
+          Brown
+        </button>
+        <button disabled id="butBinaural" type="button">
+          <svg viewBox="0 0 100 100">
+            <use xlink:href="#icon-wave"></use>
+          </svg>
+          Binaural
+        </button>
       </div>
     </div>
 
@@ -189,19 +151,51 @@
           Settings
         </div>
         <div class="dialog-body">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-          ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat
-          nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-          sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+          <div class="white-settings">
+            <div>
+              <label for="wnGain">White Noise Gain</label>
+              <input id="wnGain" type="number" required value="75" min="1" max="100">
+            </div>
+          </div>
+          <div class="pink-settings">
+            <div>
+              <label for="pnGain">Pink Noise Gain</label>
+              <input id="pnGain" type="number" required value="75" min="1" max="100">
+            </div>
+          </div>
+          <div class="brown-settings">
+            <div>
+              <label for="bnGain">Brown Noise Gain</label>
+              <input id="bnGain" type="number" required value="75" min="1" max="100">
+            </div>
+          </div>
+          <div class="binaural-settings">
+            <div>
+              <label for="biGain">Binaural Noise Gain</label>
+              <input id="biGain" type="number" required value="75" min="1" max="100">
+            </div>
+          </div>
+            <div>
+              <label for="biPitch">Pitch</label>
+              <input id="biPitch" type="number" required value="420" min="20" max="750" step="1">
+            </div>
+            <div>
+              <label for="biBeat">Beat</label>
+              <input id="biBeat" type="number" required value="5" min="1" max="100" step="1">
+            </div>
+            <div>
+              <label for="biWaveForm">Wave Form</label>
+              <input id="biWaveForm" type="text" required value="sine">
+            </div>
+          </div>
         </div>
         <div class="dialog-buttons">
           <button type="button">Close</button>
         </div>
       </div>
-      -->
+    -->
+
 
     </div>
 

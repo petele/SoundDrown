@@ -32,17 +32,22 @@ body, html {
 
 body {
   background-color: var(--app-body-bg);
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
   font-family: Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   line-height: 1.5;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
 
-.hidden { display: none !important; }
+.hidden {
+  display: none !important;
+}
 
 header {
   background-color: var(--app-header-bg);
-  margin-bottom: 1em;
+  width: 100%;
 }
 
 header h1 {
@@ -105,6 +110,13 @@ header h1 {
 }
 
 .sound-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    margin-top: -84px;
+}
+
+.sound-container-inner {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;

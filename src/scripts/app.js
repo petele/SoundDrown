@@ -19,12 +19,6 @@ class Noise {
     this.connectNoise(this.addGenerator());
     this.isPlaying = false;
     this.defaultGain = opts.defaultGain || 0.75;
-    if (opts.gainSelector) {
-      const elem = document.querySelector(opts.gainSelector);
-      elem.addEventListener('change', () => {
-        this.setGain(parseInt(elem.value, 10) / 100);
-      });
-    }
   }
   connectNoise(noise) {
     this.noise = noise;
@@ -175,47 +169,6 @@ class BinauralNoise extends Noise {
   constructor(context, opts = {}) {
     super('BinauralNoise', context, opts);
     this.opts = opts;
-    if (opts.pitchSelector) {
-      const elem = document.querySelector(opts.pitchSelector);
-      const min = parseInt(elem.min, 10) || 100;
-      const max = parseInt(elem.max, 10) || 100;
-      elem.addEventListener('change', (evt) => {
-        const value = parseInt(elem.value, 10);
-        if (value < min || value > max) {
-          elem.value = this.noise.pitch;
-          return;
-        }
-        gaEvent('Settings', this.name, 'pitch', value);
-        this.noise.setPitch(value);
-      });
-    }
-    if (opts.beatSelector) {
-      const elem = document.querySelector(opts.beatSelector);
-      const min = parseInt(elem.min, 10) || 100;
-      const max = parseInt(elem.max, 10) || 100;
-      elem.addEventListener('change', (evt) => {
-        const value = parseInt(elem.value);
-        if (value < min || value > max) {
-          elem.value = this.noise.beatRate;
-          return;
-        }
-        gaEvent('Settings', this.name, 'beatRate', value);
-        this.noise.setBeatRate(value);
-      });
-    }
-    if (opts.waveFormSelector) {
-      const elem = document.querySelector(opts.waveFormSelector);
-      const forms = ['sine', 'square', 'sawtooth', 'triangle'];
-      elem.addEventListener('blur', (evt) => {
-        const value = elem.value.toLowerCase();
-        if (!forms.includes(value)) {
-          elem.value = this.noise.waveType;
-          return;
-        }
-        gaEvent('Settings', this.name, value);
-        this.noise.setWaveType(value);
-      });
-    }
   }
   addGenerator() {
     return new BinauralBeatJS(this.audioContext, this.opts);
