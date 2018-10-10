@@ -1,15 +1,19 @@
-/* */
 'use strict';
 
 const del = require('del');
 const gulp = require('gulp');
+const fs = require('fs-extra');
+const semver = require('semver');
 const csso = require('gulp-csso');
 const copy = require('gulp-copy');
 const babel = require('gulp-babel');
+const colors = require('ansi-colors');
 const uglify = require('gulp-uglify');
+const connect = require('gulp-connect');
 const htmlmin = require('gulp-htmlmin');
 const replace = require('gulp-replace');
 const workbox = require('workbox-build');
+const firebase = require('firebase-tools');
 const runSequence = require('run-sequence');
 const sourcemaps = require('gulp-sourcemaps');
 const autoprefixer = require('gulp-autoprefixer');
@@ -18,6 +22,20 @@ const inlinesource = require('gulp-inline-source');
 const SRC_DIR = 'src';
 const DEST_DIR = 'build';
 const TEMP_DIR = '.tmp';
+
+function bumpVersion(release) {
+  return fs.readJson('./package.json')
+    .then((data) => {
+      const currentVersion = data.version;
+      const nextVersion = semver.inc(currentVersion, release);
+      data.version = nextVersion;
+      return fs.writeJson('./package.json', data, {spaces: 2});
+    });
+}
+
+gulp.task('bump:patch', () => {
+  return bumpVersion('patch');
+});
 
 gulp.task('clean:temp', () => {
   const filesToDelete = ['.tmp/**'];
@@ -85,9 +103,12 @@ gulp.task('html-build', ['html-copy', 'css-build', 'js-build'], () => {
     minifyJS: true,
     removeComments: true,
   };
+  const buildDate = new Date().toISOString();
+  const packageJSON = fs.readJsonSync('./package.json');
   return gulp.src(`${TEMP_DIR}/index.html`)
       .pipe(sourcemaps.init())
-      .pipe(replace('[[BUILD_DATE]]', Date.now()))
+      .pipe(replace('[[BUILD_DATE]]', buildDate))
+      .pipe(replace('[[VERSION]]', packageJSON.version))
       .pipe(htmlmin(htmlMinOpts))
       .pipe(inlinesource(inlineOpts))
       .pipe(sourcemaps.write(`maps/`))
@@ -129,7 +150,7 @@ gulp.task('generate-service-worker', () => {
     ],
   }).then(({warnings}) => {
     for (const warning of warnings) {
-      console.warn(warning);
+      console.log(warning);
     }
   });
 });
@@ -140,4 +161,20 @@ gulp.task('build:no-sw', ['clean'], (cb) => {
 
 gulp.task('build', (cb) => {
   return runSequence('build:no-sw', 'generate-service-worker', cb);
+});
+
+gulp.task('serve', () => {
+  return connect.server({root: 'src'});
+});
+
+gulp.task('serve:prod', ['build:no-sw'], () => {
+  return connect.server({root: 'build'});
+});
+
+gulp.task('deploy-firebase', () => {
+  return firebase.deploy();
+});
+
+gulp.task('deploy', (cb) => {
+  return runSequence('bump:patch', 'build', 'deploy-firebase', cb);
 });
