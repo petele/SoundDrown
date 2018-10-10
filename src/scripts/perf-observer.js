@@ -19,6 +19,18 @@ function gaEvent(category, action, label, value, nonInteraction) {
   ga('send', 'event', obj);
 }
 
+function trackWindowMode() {
+  if (window.navigator.standalone === true) {
+    gaEvent('Window Style', 'standalone-ios');
+    return;
+  }
+  if (matchMedia('(display-mode: standalone)').matches === true) {
+    gaEvent('Window Style', 'standalone');
+    return;
+  }
+  gaEvent('Window Style', 'browser');
+}
+
 if ('PerformanceObserver' in window) {
   const paintObserver = new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
@@ -48,3 +60,17 @@ if ('PerformanceObserver' in window) {
   });
   longTaskObserver.observe({entryTypes: ['longtask']});
 }
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    trackWindowMode();
+  }, 5000);
+  if ('performance' in window) {
+    const pNow = Math.round(performance.now());
+    gaEvent('Performance Metrics', 'window-load', null, pNow);
+  }
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  ga('send', 'pageview', '/');
+});

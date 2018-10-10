@@ -1,5 +1,6 @@
 'use strict';
 
+const noises = {};
 const BUFFER_SIZE = 1024 * 1;
 
 class Noise {
@@ -337,8 +338,6 @@ class BinauralBeatJS {
   }
 }
 
-const noises = {};
-
 function initSounds() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (!AudioContext) {
@@ -432,63 +431,14 @@ function initBinauralNoise(audioContext) {
   });
 }
 
-function trackWindowMode() {
-  setTimeout(() => {
-    if (window.navigator.standalone === true) {
-      gaEvent('Window Style', 'standalone-ios');
-      return;
-    }
-    if (matchMedia('(display-mode: standalone)').matches === true) {
-      gaEvent('Window Style', 'standalone');
-      return;
-    }
-    gaEvent('Window Style', 'browser');
-  }, 5000);
-}
-
-class PWAInstaller {
-  constructor(buttonSelector) {
-    this.deferredEvent;
-    this.installButton = document.querySelector(buttonSelector);
-    window.addEventListener('beforeinstallprompt', (e) => {
-      this.deferredEvent = e;
-      this.installButton.classList.toggle('hidden', false);
-      gaEvent('InstallButton', 'shown');
-    });
-    window.addEventListener('appinstalled', (e) => {
-      gaEvent('InstallEvent', 'installed');
-      this.hideButton();
-    });
-    this.installButton.addEventListener('click', (e) => {
-      this.hideButton();
-      if (!this.deferredEvent) {
-        return;
-      }
-      this.deferredEvent.prompt();
-      this.deferredEvent.userChoice.then((result) => {
-        gaEvent('InstallPromptResponse', result.outcome);
-        this.deferredEvent = null;
-      });
-      gaEvent('InstallButton', 'clicked');
-    });
-  }
-  hideButton() {
-    this.installButton.classList.toggle('hidden', true);
-  }
-}
-
 window.addEventListener('load', () => {
-  new PWAInstaller('#butInstall');
   initSounds();
-  trackWindowMode();
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js', {
-      scope: '/',
-    });
-  }
-  if ('performance' in window) {
-    const pNow = Math.round(performance.now());
-    gaEvent('Performance Metrics', 'load', null, pNow);
-  }
 });
-ga('send', 'pageview', '/');
+
+window.addEventListener('unload', () => {
+  // Stop the noise from playing, and fire any remaining tracking events
+  Object.keys(noises).forEach((key) => {
+    const noise = noises[key];
+    noise.toggleNoise(false);
+  });
+});
