@@ -1,33 +1,39 @@
 'use strict';
 
-const soundDrownApp = {
-  wn: null,
-  pn: null,
-  bn: null,
-  bi: null,
-  audioElement: null,
-  mediaSessionPreviousState: {},
-};
+/**
+ * List of all of initialized sounds.
+ * @type {Object}
+ */
+const soundDrownNoises = {};
 
-/** Class representing the base Noise Generator. */
+/**
+ * Instance of the media session controller.
+ * @instance
+ * @type {MediaSessionController}
+ */
+let mediaSessionController;
+
+/**
+ * Base class representing a Noise Generator.
+ */
 class Noise {
   /**
    * Create a Noise object.
-   * @param {string} name - Name of the sound generator.
-   * @param {Object=} opts - Options used when creating generator.
-   * @param {string=} opts.buttonSelector - The selector for the button.
-   * @param {number=} opts.bufferSize - Size of WebAudio buffer (1024).
-   * @param {Function=} opts.gaEvent - For tracking Google Analytics events.
+   * @param {string} name - Name of the noise generator.
+   * @param {Object} [opts] - Options used when creating generator.
+   * @param {string} [opts.buttonSelector] - The selector for the button.
+   * @param {number} [opts.bufferSize=1024] - Size of WebAudio buffer.
+   * @param {Function} [opts.gaEvent] - For tracking Google Analytics events.
    */
   constructor(name, opts = {}) {
-    this.name = name;
-    this.playing = false;
+    this._name = name;
+    this._playing = false;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     this._audioContext = new AudioContext();
     this._audioContext.suspend();
     this._opts = opts;
     this._bufferSize = opts.bufferSize || 1024;
-    this._noiseGenerator = this.getGenerator();
+    this._noiseGenerator = this._getGenerator(opts);
     this._noiseGenerator.connect(this._audioContext.destination);
     this._startedAt = 0;
     if (opts.buttonSelector) {
@@ -38,10 +44,35 @@ class Noise {
     }
   }
   /**
+   * Name of the noise generator.
+   * @readonly
+   * @member {string}
+   */
+  get name() {
+    return this._name;
+  }
+  /**
+   * Is it generating noise.
+   * @readonly
+   * @member {boolean}
+   */
+  get playing() {
+    return !!this._playing;
+  }
+  /**
+   * Create & return the noise generator.
+   * @private
+   * @abstract
+   */
+  _getGenerator() {
+    throw new Error('not implemented');
+  }
+  /**
    * Add a gain filter to the current node.
-   * @param {WebAudioNode} noise - The web audio node to apply the gain to.
+   * @private
+   * @param {AudioNode} noise - The web audio node to apply the gain to.
    * @param {number} gainValue - Amount (float) of gain to add.
-   * @return {WebAudioNode} - Node after the gain has been applied.
+   * @return {AudioNode} - Node after the gain has been applied.
    */
   _addGain(noise, gainValue) {
     if (gainValue === 1.0) {
@@ -53,39 +84,54 @@ class Noise {
     return gainNode;
   }
   /**
-   * Starts or stops the noise generator.
-   * @param {boolean=} play - Start or stop the noise generator,
-   * toggles if not provided.
-   * @return {boolean} Playing status
+   * Toggles the noise generator play status.
+   * @return {boolean} Playing status.
    */
-  toggle(play) {
-    if (play === true && this.playing === true) {
-      return play;
+  toggle() {
+    if (this.playing) {
+      return this.pause();
     }
-    if (play === false && this.playing === false) {
-      return play;
+    return this.play();
+  }
+  /**
+   * Starts the noise generator.
+   * @return {boolean} Playing status.
+   */
+  play() {
+    if (this.playing) {
+      return true;
     }
-    if (typeof play !== 'boolean') {
-      play = !this.playing;
+    this._audioContext.resume();
+    this._startedAt = Date.now();
+    if (this._gaEvent) {
+      this._gaEvent('Noise', 'start', this.name);
     }
-    if (play) {
-      this._audioContext.resume();
-      this._startedAt = Date.now();
-      if (this._gaEvent) {
-        this._gaEvent('Noise', 'start', this.name);
-      }
-    } else {
-      this._audioContext.suspend();
-      if (this._gaEvent) {
-        const duration = Math.round((Date.now() - this._startedAt) / 1000);
-        this._gaEvent('Noise', 'duration', this.name, duration);
-      }
-    }
-    this.playing = play;
+    this._playing = true;
     if (this._button) {
-      updateNoiseButtonState(this._button, play);
+      this._button.classList.toggle('on', true);
+      // updateNoiseButtonState(this._button, true);
     }
-    return play;
+    return true;
+  }
+  /**
+   * Pauses the noise generator.
+   * @return {boolean} Playing status.
+   */
+  pause() {
+    if (!this.playing) {
+      return false;
+    }
+    this._audioContext.suspend();
+    if (this._gaEvent) {
+      const duration = Math.round((Date.now() - this._startedAt) / 1000);
+      this._gaEvent('Noise', 'duration', this.name, duration);
+    }
+    this._playing = false;
+    if (this._button) {
+      this._button.classList.toggle('on', false);
+      // updateNoiseButtonState(this._button, false);
+    }
+    return false;
   }
 }
 
@@ -96,16 +142,18 @@ class Noise {
 class WhiteNoise extends Noise {
   /**
    * Create a White Noise object.
-   * @param {Object=} opts - @see {@link Noise}
+   * @param {Object} [opts={}] - See {@link Noise}
    */
   constructor(opts = {}) {
     super('WhiteNoise', opts);
   }
   /**
    * Creates the web audio node.
-   * @return {WebAudioNode} The newly created node
+   * @override
+   * @return {ScriptProcessorNode} The newly created node.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode
    */
-  getGenerator() {
+  _getGenerator() {
     const context = this._audioContext;
     const noise = context.createScriptProcessor(this._bufferSize, 1, 1);
     noise.addEventListener('audioprocess', (e) => {
@@ -125,16 +173,18 @@ class WhiteNoise extends Noise {
 class PinkNoise extends Noise {
   /**
    * Create a Pink Noise object.
-   * @param {Object=} opts - @see {@link Noise}
+   * @param {Object} [opts={}] - See {@link Noise}
    */
   constructor(opts = {}) {
     super('PinkNoise', opts);
   }
   /**
    * Creates the web audio node.
-   * @return {WebAudioNode} The newly created node.
+   * @override
+   * @return {ScriptProcessorNode} The newly created node.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode
    */
-  getGenerator() {
+  _getGenerator() {
     const context = this._audioContext;
     const noise = context.createScriptProcessor(this._bufferSize, 1, 1);
     let b0 = 0;
@@ -169,16 +219,18 @@ class PinkNoise extends Noise {
 class BrownNoise extends Noise {
   /**
    * Create a Brown Noise object.
-   * @param {Object=} opts - @see {@link Noise}
+   * @param {Object} [opts={}] - See {@link Noise}
    */
   constructor(opts = {}) {
     super('BrownNoise', opts);
   }
   /**
    * Creates the web audio node.
-   * @return {WebAudioNode} The newly created node.
+   * @override
+   * @return {AudioNode} The newly created node.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode
    */
-  getGenerator() {
+  _getGenerator() {
     const context = this._audioContext;
     const noise = context.createScriptProcessor(this._bufferSize, 1, 1);
     let lastOut = 0.0;
@@ -195,172 +247,131 @@ class BrownNoise extends Noise {
 }
 
 /**
- * Class representing a Binaural Noise Generator.
+ * Class representing a Binaural Tone Generator.
  * @extends Noise
  */
-class BinauralNoise extends Noise {
+class BinauralTone extends Noise {
   /**
-   * Create a Binaural Noise object.
-   * @param {Object=} opts - @see {@link Noise} and @see {@link BinauralNoiseJS}
+   * Create a binaural tone object.
+   * @param {Object} [opts={}] - See {@link Noise} for base options.
+   * @param {number} [opts.frequency=440] - The primary frequency (Hz) to play.
+   * @param {number} [opts.freqDiff=5] - The differential to apply to each
+   * channel.
+   * @param {string} [opts.waveType=sine] - The shape
+   * ({@linkcode BinauralTone#WAVE_FORMS|WAVE_FORM}) of the oscillator wave.
    */
   constructor(opts = {}) {
-    super('BinauralNoise', opts);
+    super('BinauralTone', opts);
+  }
+  /**
+   * Enum for the different wave forms
+   * @readonly
+   * @enum {Object}
+   */
+  get WAVE_FORMS() {
+    return {
+      SINE: 'sine',
+      SQUARE: 'square',
+      SAWTOOTH: 'sawtooth',
+      TRIANGLE: 'triangle',
+    };
   }
   /**
    * Creates the web audio node.
-   * @see {binaural-beat.js}
-   * @return {WebAudioNode} The newly created node.
+   * @override
+   * @param {Object} [opts]
+   * @return {ChannelMergerNode} The newly created node.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/ChannelMergerNode
    */
-  getGenerator() {
-    // eslint-disable-next-line no-undef
-    return new BinauralBeatJS(this._audioContext, this._opts);
+  _getGenerator(opts = {}) {
+    // Set the initial defaults
+    this._freqDiff = opts.freqDiff || 5;
+    this._frequency = opts.frequency || 440;
+    this._waveType = opts.waveType || this.WAVE_FORMS.SINE;
+
+    // Hook up the nodes
+    const context = this._audioContext;
+    this._channelMerger = context.createChannelMerger(2);
+    this._leftChannel = context.createOscillator();
+    this._rightChannel = context.createOscillator();
+    this._leftChannel.connect(this._channelMerger, 0, 0);
+    this._rightChannel.connect(this._channelMerger, 0, 1);
+
+    // Set up the initial options
+    this.setWaveType(this._waveType);
+    this.setFrequency(this._frequency, this._freqDiff);
+
+    // Connect the channels & start the sound
+    this._leftChannel.connect(this._channelMerger, 0, 0);
+    this._rightChannel.connect(this._channelMerger, 0, 1);
+    this._leftChannel.start(0);
+    this._rightChannel.start(0);
+
+    return this._channelMerger;
+  }
+  /**
+   * Sets the tone frequency and applies the differential between each ear.
+   * @param {number} frequency - The primary frequency (Hz) to play.
+   * @param {number} [freqDiff] - The differential between the left/right ear.
+   * @return {Object} The frequency for the left/right ear.
+   */
+  setFrequency(frequency, freqDiff) {
+    if (!freqDiff) {
+      freqDiff = this._freqDiff;
+    }
+    const offset = freqDiff / 2;
+    const leftFreq = frequency - offset;
+    const rightFreq = frequency + offset;
+    this._leftChannel.frequency.value = leftFreq;
+    this._rightChannel.frequency.value = rightFreq;
+    this._freqDiff = freqDiff;
+    this._frequency = frequency;
+    const result = {left: leftFreq, right: rightFreq};
+    console.log('🎛️', result);
+    return result;
+  }
+  /**
+   * Sets the shape of the oscillator wave form.
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode/type}
+   * @param {string} waveType - The shape of the oscillator wave.
+   * @return {string} The wave form used by the left channel.
+   */
+  setWaveType(waveType) {
+    if (waveType === this._leftChannel.type) {
+      return waveType;
+    }
+    this._leftChannel.type = waveType;
+    this._rightChannel.type = waveType;
+    this._waveType = waveType;
+    console.log('🎛️', 'Wave Type:', waveType);
+    return this._leftChannel.type;
   }
 }
 
 /**
- * Remove the disabled attribute from the button and adds an event
+ * Remove the disabled attribute from the button and adds an event.
  * handler to toggle the specified noise.
- *
  * @param {string} selector - Button selector.
- * @param {WebAudioNode} noise - The noise class.
+ * @param {AudioNode} noise - The noise class.
  */
 function setupNoiseButton(selector, noise) {
   const button = document.querySelector(selector);
   button.removeAttribute('disabled');
   button.addEventListener('click', () => {
     noise.toggle();
+    mediaSessionController.updatePlayState();
   });
 }
 
-/**
- * Updates the styles on a button to indicate it's playing.
- *
- * @param {Button} button - The button element to update.
- * @param {boolean} isPlaying - If the noise is playing or not.
- */
-function updateNoiseButtonState(button, isPlaying) {
-  button.classList.toggle('on', isPlaying);
-  updateMediaSession();
-}
-
-/**
- * Setup the Media Session API.
- * @param {Object=} opts - Options param.
- * @param {Function=} opts.gaEvent - For tracking Google Analytics events.
- */
-function setupMediaSession(opts = {}) {
-  if ('mediaSession' in navigator) {
-    // eslint-disable-next-line no-undef
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: 'SoundDrown',
-      album: 'White Noise Generator',
-      artwork: [
-        {src: '/images/48.png', sizes: '48x48', type: 'image/png'},
-        {src: '/images/192.png', sizes: '192x192', type: 'image/png'},
-        {src: '/images/256.png', sizes: '256x256', type: 'image/png'},
-        {src: '/images/512.png', sizes: '512x412', type: 'image/png'},
-      ],
-    });
-    navigator.mediaSession.setActionHandler('play', () => {
-      mediaSessionPlay();
-      if (opts.gaEvent) {
-        opts.gaEvent('MediaSessionAPI', 'play');
-      }
-    });
-    navigator.mediaSession.setActionHandler('pause', () => {
-      mediaSessionPause();
-      if (opts.gaEvent) {
-        opts.gaEvent('MediaSessionAPI', 'pause');
-      }
-    });
-    soundDrownApp.audioElement = document.querySelector('audio');
-    soundDrownApp.audioElement.src = '/sounds/silence.mp3';
-    if (opts.gaEvent) {
-      opts.gaEvent('MediaSession', 'enabled');
-    }
-  }
-}
-
-/**
- * Handler for the Media Session API play button.
- */
-function mediaSessionPlay() {
-  if (!soundDrownApp.audioElement || !soundDrownApp.audioElement.paused) {
-    return;
-  }
-  let somethingStarted = false;
-  if (soundDrownApp.mediaSessionPreviousState.wn) {
-    soundDrownApp.wn.toggle(true);
-    somethingStarted = true;
-  }
-  if (soundDrownApp.mediaSessionPreviousState.bn) {
-    soundDrownApp.bn.toggle(true);
-    somethingStarted = true;
-  }
-  if (soundDrownApp.mediaSessionPreviousState.pn) {
-    soundDrownApp.pn.toggle(true);
-    somethingStarted = true;
-  }
-  if (soundDrownApp.mediaSessionPreviousState.bi) {
-    soundDrownApp.bi.toggle(true);
-    somethingStarted = true;
-  }
-  if (!somethingStarted) {
-    soundDrownApp.wn.toggle(true);
-  }
-}
-
-/**
- * Handler for the Media Session API pause button.
- */
-function mediaSessionPause() {
-  if (!soundDrownApp.audioElement || soundDrownApp.audioElement.paused) {
-    return;
-  }
-  soundDrownApp.mediaSessionPreviousState.wn = soundDrownApp.wn.playing;
-  soundDrownApp.mediaSessionPreviousState.bn = soundDrownApp.bn.playing;
-  soundDrownApp.mediaSessionPreviousState.pn = soundDrownApp.pn.playing;
-  soundDrownApp.mediaSessionPreviousState.bi = soundDrownApp.bi.playing;
-  stopAll();
-}
-
-/**
- * Updates the play state of the <audio> element used by the
- * Media Session API.
- */
-function updateMediaSession() {
-  if (!soundDrownApp.audioElement) {
-    return;
-  }
-  if (soundDrownApp.wn.playing || soundDrownApp.pn.playing ||
-      soundDrownApp.bn.playing || soundDrownApp.bi.playing) {
-    if (soundDrownApp.audioElement.paused) {
-      soundDrownApp.audioElement.play();
-    }
-    return;
-  }
-  soundDrownApp.audioElement.pause();
-}
-
-/**
- * Stop all noise generators.
- */
-function stopAll() {
-  soundDrownApp.wn.toggle(false);
-  soundDrownApp.pn.toggle(false);
-  soundDrownApp.bn.toggle(false);
-  soundDrownApp.bi.toggle(false);
-}
-
-window.addEventListener('load', () => {
+window.addEventListener('load', (e) => {
   const promises = [];
   promises.push(new Promise((resolve) => {
     const opts = {
       buttonSelector: '#butWhite',
       gaEvent: gaEvent, // eslint-disable-line no-undef
     };
-    soundDrownApp.wn = new WhiteNoise(opts);
-    setupNoiseButton('#butWhite', soundDrownApp.wn);
+    soundDrownNoises.wn = new WhiteNoise(opts);
+    setupNoiseButton('#butWhite', soundDrownNoises.wn);
     resolve(true);
   }));
   promises.push(new Promise((resolve) => {
@@ -368,8 +379,8 @@ window.addEventListener('load', () => {
       buttonSelector: '#butPink',
       gaEvent: gaEvent, // eslint-disable-line no-undef
     };
-    soundDrownApp.pn = new PinkNoise(opts);
-    setupNoiseButton('#butPink', soundDrownApp.pn);
+    soundDrownNoises.pn = new PinkNoise(opts);
+    setupNoiseButton('#butPink', soundDrownNoises.pn);
     resolve(true);
   }));
   promises.push(new Promise((resolve) => {
@@ -377,8 +388,8 @@ window.addEventListener('load', () => {
       buttonSelector: '#butBrown',
       gaEvent: gaEvent, // eslint-disable-line no-undef
     };
-    soundDrownApp.bn = new BrownNoise(opts);
-    setupNoiseButton('#butBrown', soundDrownApp.bn);
+    soundDrownNoises.bn = new BrownNoise(opts);
+    setupNoiseButton('#butBrown', soundDrownNoises.bn);
     resolve(true);
   }));
   promises.push(new Promise((resolve) => {
@@ -386,8 +397,8 @@ window.addEventListener('load', () => {
       buttonSelector: '#butBinaural',
       gaEvent: gaEvent, // eslint-disable-line no-undef
     };
-    soundDrownApp.bi = new BinauralNoise(opts);
-    setupNoiseButton('#butBinaural', soundDrownApp.bi);
+    soundDrownNoises.bi = new BinauralTone(opts);
+    setupNoiseButton('#butBinaural', soundDrownNoises.bi);
     resolve(true);
   }));
   Promise.all(promises).then(() => {
@@ -397,12 +408,11 @@ window.addEventListener('load', () => {
       gaEvent('Performance Metrics', 'sounds-ready', null, pNow, true);
     }
   });
-  new Promise((resolve) => {
-    // eslint-disable-next-line no-undef
-    setupMediaSession({gaEvent});
-  });
 });
 
 window.addEventListener('unload', () => {
-  stopAll();
+  // eslint-disable-next-line guard-for-in
+  for (const key in soundDrownNoises) {
+    soundDrownNoises[key].pause();
+  }
 });

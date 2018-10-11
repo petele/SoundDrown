@@ -5,8 +5,8 @@ class Dialog {
   /**
    * Create a Dialog element.
    * @param {string} selector - The selector to the dialog element.
-   * @param {Object=} opts - Options used when creating dialog.
-   * @param {Function=} opts.gaEvent - For tracking Google Analytics events.
+   * @param {Object} [opts] - Options used when creating dialog.
+   * @param {Function} [opts.gaEvent] - For tracking Google Analytics events.
    */
   constructor(selector, opts = {}) {
     this.elem = document.querySelector(selector);
@@ -22,7 +22,7 @@ class Dialog {
   }
   /**
    * Shows or hides the dialog.
-   * @param {boolean=} visible - Show or hides the dialog (false).
+   * @param {boolean} [visible=false] - Show or hides the dialog.
    */
   show(visible) {
     this.container.classList.toggle('hidden', !visible);

@@ -24,6 +24,7 @@
     "gulp-eslint": "^5.0.0",
     "gulp-htmlmin": "^5.0.1",
     "gulp-inline-source": "^3.2.0",
+    "gulp-jsdoc3": "^2.0.0",
     "gulp-replace": "^1.0.0",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify": "^3.0.1",

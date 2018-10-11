@@ -4,9 +4,9 @@
  * Logs an event to Google Analytics.
  * @param {string} category - The object that was interacted with.
  * @param {string} action - The type of interaction.
- * @param {string=} label - Useful for categorizing events.
- * @param {number=} value - A numeric value associated with the event.
- * @param {boolean=} nonInteraction - Indicates a non-interaction event.
+ * @param {string} [label] - Useful for categorizing events.
+ * @param {number} [value] - A numeric value associated with the event.
+ * @param {boolean} [nonInteraction=false] - Indicates a non-interaction event.
  */
 function gaEvent(category, action, label, value, nonInteraction) {
   console.log('🔔', category, action, label, value);
@@ -30,20 +30,6 @@ function gaEvent(category, action, label, value, nonInteraction) {
   ga('send', 'event', obj);
 }
 
-/**
- * Logs the window style to Google Analytics.
- */
-function trackWindowMode() {
-  if (window.navigator.standalone === true) {
-    gaEvent('Window Style', 'standalone-ios');
-    return;
-  }
-  if (matchMedia('(display-mode: standalone)').matches === true) {
-    gaEvent('Window Style', 'standalone');
-    return;
-  }
-  gaEvent('Window Style', 'browser');
-}
 
 if ('PerformanceObserver' in window) {
   const paintObserver = new PerformanceObserver((list) => {
@@ -76,14 +62,26 @@ if ('PerformanceObserver' in window) {
 }
 
 window.addEventListener('load', () => {
-  setTimeout(() => {
-    trackWindowMode();
-  }, 5000);
   if ('performance' in window) {
     const pNow = Math.round(performance.now());
     gaEvent('Performance Metrics', 'window-load', null, pNow);
   }
 });
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    if (window.navigator.standalone === true) {
+      gaEvent('Window Style', 'standalone-ios');
+      return;
+    }
+    if (matchMedia('(display-mode: standalone)').matches === true) {
+      gaEvent('Window Style', 'standalone');
+      return;
+    }
+    gaEvent('Window Style', 'browser');
+  }, 5000);
+});
+
 
 window.addEventListener('DOMContentLoaded', () => {
   // eslint-disable-next-line no-undef

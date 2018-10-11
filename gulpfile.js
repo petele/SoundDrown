@@ -9,6 +9,7 @@ const semver = require('semver');
 const csso = require('gulp-csso');
 const copy = require('gulp-copy');
 const babel = require('gulp-babel');
+const jsdoc = require('gulp-jsdoc3');
 const eslint = require('gulp-eslint');
 const uglify = require('gulp-uglify');
 const connect = require('gulp-connect');
@@ -55,7 +56,12 @@ gulp.task('clean:build', () => {
   return del(filesToDelete);
 });
 
-gulp.task('clean', ['clean:build', 'clean:temp']);
+gulp.task('clean:docs', () => {
+  const filesToDelete = ['docs/**'];
+  return del(filesToDelete);
+});
+
+gulp.task('clean', ['clean:build', 'clean:temp', 'clean:docs']);
 
 gulp.task('lint', () => {
   const filesToLint = [
@@ -71,6 +77,17 @@ gulp.task('lint', () => {
       .pipe(eslint.format())
       .pipe(eslint.failAfterError());
 });
+
+gulp.task('jsdoc', ['clean:docs', 'lint'], () => {
+  const filesToDoc = [
+    'README.md',
+    'src/scripts/*.js',
+  ];
+  const config = fs.readJsonSync('.jsdocrc.json');
+  return gulp.src(filesToDoc, {read: false})
+      .pipe(jsdoc(config));
+});
+
 
 gulp.task('css-build', () => {
   const autoprefixOpts = {
@@ -125,7 +142,7 @@ gulp.task('html-build', ['html-copy', 'css-build', 'js-build'], () => {
     removeComments: true,
   };
   const buildDate = new Date().toISOString();
-  const packageJSON = fs.readJsonSync('./package.json');
+  const packageJSON = fs.readJsonSync('package.json');
   return gulp.src(`${TEMP_DIR}/index.html`)
       .pipe(sourcemaps.init())
       .pipe(replace('[[BUILD_DATE]]', buildDate))
