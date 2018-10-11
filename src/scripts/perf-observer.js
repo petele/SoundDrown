@@ -1,5 +1,5 @@
 function gaEvent(category, action, label, value, nonInteraction) {
-  console.log('🦄', category, action, label, value);
+  console.log('🔔', category, action, label, value);
   if (location.hostname === 'localhost') {
     return;
   }
@@ -51,14 +51,14 @@ if ('PerformanceObserver' in window) {
   // });
   // resourceObserver.observe({entryTypes: ['resource']});
 
-  const longTaskObserver = new PerformanceObserver((list) => {
-    for (const entry of list.getEntries()) {
-      const attribution = JSON.stringify(entry.attribution);
-      const time = Math.round(entry.startTime + entry.duration);
-      gaEvent('Long Task', attribution, null, time, true);
-    }
-  });
-  longTaskObserver.observe({entryTypes: ['longtask']});
+  // const longTaskObserver = new PerformanceObserver((list) => {
+  //   for (const entry of list.getEntries()) {
+  //     const attribution = JSON.stringify(entry.attribution);
+  //     const time = Math.round(entry.startTime + entry.duration);
+  //     gaEvent('Long Task', attribution, null, time, true);
+  //   }
+  // });
+  // longTaskObserver.observe({entryTypes: ['longtask']});
 }
 
 window.addEventListener('load', () => {
