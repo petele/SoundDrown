@@ -120,6 +120,7 @@ gulp.task('copy-static', () => {
     `${TEMP_DIR}/index.html`,
     `${TEMP_DIR}/maps/**/*`,
     `${SRC_DIR}/images/**/*`,
+    `${SRC_DIR}/sounds/**/*`,
     `${SRC_DIR}/manifest.json`,
     `${SRC_DIR}/robots.txt`,
     `${SRC_DIR}/humans.txt`,

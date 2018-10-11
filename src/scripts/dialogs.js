@@ -11,6 +11,7 @@ class Dialog {
     });
   }
   show(visible) {
+    gaEvent('Dialog', this.elem.id);
     this.container.classList.toggle('hidden', !visible);
     this.elem.classList.toggle('hidden', !visible);
   }
