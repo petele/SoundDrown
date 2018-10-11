@@ -1,3 +1,13 @@
+'use strict';
+
+/**
+ * Logs an event to Google Analytics.
+ * @param {string} category - The object that was interacted with.
+ * @param {string} action - The type of interaction.
+ * @param {string} label - Useful for categorizing events.
+ * @param {number} value - A numeric value associated with the event.
+ * @param {boolean} nonInteraction - Indicates a non-interaction event.
+ */
 function gaEvent(category, action, label, value, nonInteraction) {
   console.log('🔔', category, action, label, value);
   if (location.hostname === 'localhost') {
@@ -19,6 +29,9 @@ function gaEvent(category, action, label, value, nonInteraction) {
   ga('send', 'event', obj);
 }
 
+/**
+ * Logs the window style to Google Analytics.
+ */
 function trackWindowMode() {
   if (window.navigator.standalone === true) {
     gaEvent('Window Style', 'standalone-ios');

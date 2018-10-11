@@ -1,9 +1,14 @@
 'use strict';
 
+/** Class to handle the PWA add to home screen dialog. */
 class PWAInstaller {
-  constructor(buttonSelector) {
+  /**
+   * Set up the add to home screen elements.
+   * @param {string} selector - The selector to the dialog element.
+   */
+  constructor(selector) {
     this.deferredEvent;
-    this.installButton = document.querySelector(buttonSelector);
+    this.installButton = document.querySelector(selector);
     window.addEventListener('beforeinstallprompt', (e) => {
       this.deferredEvent = e;
       this.installButton.classList.toggle('hidden', false);
@@ -26,6 +31,9 @@ class PWAInstaller {
       gaEvent('InstallButton', 'clicked');
     });
   }
+  /**
+   * Hides the install button.
+   */
   hideButton() {
     this.installButton.classList.toggle('hidden', true);
   }

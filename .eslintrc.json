@@ -11,7 +11,7 @@
     "html"
   ],
   "rules": {
-    "require-jsdoc": "warn",
+    "require-jsdoc": "error",
     "no-console": 0
   },
   "globals": {

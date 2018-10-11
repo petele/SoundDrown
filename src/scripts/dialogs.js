@@ -1,6 +1,11 @@
 'use strict';
 
+/** Class to handle the dialog elements. */
 class Dialog {
+  /**
+   * Create a Dialog element.
+   * @param {string} selector - The selector to the dialog element.
+   */
   constructor(selector) {
     this.elem = document.querySelector(selector);
     this.container = document.querySelector('#dialogContainer');
@@ -10,6 +15,10 @@ class Dialog {
       this.show(false);
     });
   }
+  /**
+   * Shows or hides the dialog.
+   * @param {boolean} [visible] - Show or hides the dialog.
+   */
   show(visible) {
     gaEvent('Dialog', this.elem.id);
     this.container.classList.toggle('hidden', !visible);

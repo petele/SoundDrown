@@ -1,5 +1,6 @@
 'use strict';
 
+
 const soundDrownApp = {
   wn: null,
   pn: null,
@@ -10,7 +11,14 @@ const soundDrownApp = {
 };
 const BUFFER_SIZE = 1024 * 1;
 
+/** Class representing the base Noise Generator. */
 class Noise {
+  /**
+   * Create a Noise object.
+   * @param {string} name - Name of the sound generator.
+   * @param {Object} [opts] - Options used when creating generator.
+   * @param {string} [opts.buttonSelector] - The selector for the button.
+   */
   constructor(name, opts = {}) {
     this.name = name;
     this.playing = false;
@@ -24,18 +32,30 @@ class Noise {
       this.button = document.querySelector(opts.buttonSelector);
     }
   }
+  /**
+   * Apply a gain filter to the current node.
+   * @param {WebAudioNode} noise - The web audio node to apply the gain to.
+   * @param {float} gainValue - Amount of gain to add.
+   * @return {WebAudioNode} - Node after the gain has been applied.
+   */
   applyGain(noise, gainValue) {
     const gainNode = this.audioContext.createGain();
     gainNode.gain.value = gainValue;
     noise.connect(gainNode);
     return gainNode;
   }
+  /**
+   * Starts or stops the noise generator.
+   * @param {boolean} [play] - Start or stop the noise generator,
+   * toggles if not provided.
+   * @return {boolean} Playing status
+   */
   toggle(play) {
     if (play === true && this.playing === true) {
-      return;
+      return play;
     }
     if (play === false && this.playing === false) {
-      return;
+      return play;
     }
     if (typeof play !== 'boolean') {
       play = !this.playing;
@@ -57,10 +77,23 @@ class Noise {
   }
 }
 
+/**
+ * Class representing a White Noise Generator.
+ * @extends Noise
+ */
 class WhiteNoise extends Noise {
+  /**
+   * Create a White Noise object.
+   * @param {Object} [opts] - Options used when creating generator.
+   * @param {string} [opts.buttonSelector] - The selector for the button.
+   */
   constructor(opts = {}) {
     super('WhiteNoise', opts);
   }
+  /**
+   * Creates the web audio node.
+   * @return {WebAudioNode} The newly created node
+   */
   getGenerator() {
     const noise = this.audioContext.createScriptProcessor(BUFFER_SIZE, 1, 1);
     noise.addEventListener('audioprocess', (e) => {
@@ -73,10 +106,23 @@ class WhiteNoise extends Noise {
   }
 }
 
+/**
+ * Class representing a Pink Noise Generator.
+ * @extends Noise
+ */
 class PinkNoise extends Noise {
+  /**
+   * Create a Pink Noise object.
+   * @param {Object} [opts] - Options used when creating generator.
+   * @param {string} [opts.buttonSelector] - The selector for the button.
+   */
   constructor(opts = {}) {
     super('PinkNoise', opts);
   }
+  /**
+   * Creates the web audio node.
+   * @return {WebAudioNode} The newly created node.
+   */
   getGenerator() {
     const noise = this.audioContext.createScriptProcessor(BUFFER_SIZE, 1, 1);
     let b0 = 0;
@@ -104,10 +150,23 @@ class PinkNoise extends Noise {
   }
 }
 
+/**
+ * Class representing a Brown Noise Generator.
+ * @extends Noise
+ */
 class BrownNoise extends Noise {
+  /**
+   * Create a Brown Noise object.
+   * @param {Object} [opts] - Options used when creating generator.
+   * @param {string} [opts.buttonSelector] - The selector for the button.
+   */
   constructor(opts = {}) {
     super('BrownNoise', opts);
   }
+  /**
+   * Creates the web audio node.
+   * @return {WebAudioNode} The newly created node.
+   */
   getGenerator() {
     const noise = this.audioContext.createScriptProcessor(BUFFER_SIZE, 1, 1);
     let lastOut = 0.0;
@@ -123,15 +182,36 @@ class BrownNoise extends Noise {
   }
 }
 
+/**
+ * Class representing a Binaural Noise Generator.
+ * @extends Noise
+ */
 class BinauralNoise extends Noise {
+  /**
+   * Create a Binaural Noise object.
+   * @param {Object} [opts] - Options used when creating generator.
+   * @param {string} [opts.buttonSelector] - The selector for the button.
+   */
   constructor(opts = {}) {
     super('BinauralNoise', opts);
   }
+  /**
+   * Creates the web audio node.
+   * @see {binaural-beat.js}
+   * @return {WebAudioNode} The newly created node.
+   */
   getGenerator() {
     return new BinauralBeatJS(this.audioContext, this.opts);
   }
 }
 
+/**
+ * Remove the disabled attribute from the button and adds an event
+ * handler to toggle the specified noise.
+ *
+ * @param {string} selector - Button selector.
+ * @param {WebAudioNode} noise - The noise class.
+ */
 function setupNoiseButton(selector, noise) {
   const button = document.querySelector(selector);
   button.removeAttribute('disabled');
@@ -140,11 +220,20 @@ function setupNoiseButton(selector, noise) {
   });
 }
 
+/**
+ * Updates the styles on a button to indicate it's playing.
+ *
+ * @param {Button} button - The button element to update.
+ * @param {boolean} isPlaying - If the noise is playing or not.
+ */
 function updateNoiseButtonState(button, isPlaying) {
   button.classList.toggle('on', isPlaying);
   updateMediaSession();
 }
 
+/**
+ * Setup the Media Session API.
+ */
 function setupMediaSession() {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -159,9 +248,11 @@ function setupMediaSession() {
     });
     navigator.mediaSession.setActionHandler('play', () => {
       mediaSessionPlay();
+      gaEvent('MediaSessionAPI', 'play');
     });
     navigator.mediaSession.setActionHandler('pause', () => {
       mediaSessionPause();
+      gaEvent('MediaSessionAPI', 'pause');
     });
     soundDrownApp.audioElement = document.querySelector('audio');
     soundDrownApp.audioElement.src = '/sounds/silence.mp3';
@@ -169,6 +260,9 @@ function setupMediaSession() {
   }
 }
 
+/**
+ * Handler for the Media Session API play button.
+ */
 function mediaSessionPlay() {
   if (!soundDrownApp.audioElement || !soundDrownApp.audioElement.paused) {
     return;
@@ -195,6 +289,9 @@ function mediaSessionPlay() {
   }
 }
 
+/**
+ * Handler for the Media Session API pause button.
+ */
 function mediaSessionPause() {
   if (!soundDrownApp.audioElement || soundDrownApp.audioElement.paused) {
     return;
@@ -206,6 +303,10 @@ function mediaSessionPause() {
   stopAll();
 }
 
+/**
+ * Updates the play state of the <audio> element used by the
+ * Media Session API.
+ */
 function updateMediaSession() {
   if (!soundDrownApp.audioElement) {
     return;
@@ -220,6 +321,9 @@ function updateMediaSession() {
   soundDrownApp.audioElement.pause();
 }
 
+/**
+ * Stop all noise generators.
+ */
 function stopAll() {
   soundDrownApp.wn.toggle(false);
   soundDrownApp.pn.toggle(false);
