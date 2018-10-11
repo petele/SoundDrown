@@ -5,8 +5,10 @@ class Dialog {
   /**
    * Create a Dialog element.
    * @param {string} selector - The selector to the dialog element.
+   * @param {Object=} opts - Options used when creating dialog.
+   * @param {Function=} opts.gaEvent - For tracking Google Analytics events.
    */
-  constructor(selector) {
+  constructor(selector, opts = {}) {
     this.elem = document.querySelector(selector);
     this.container = document.querySelector('#dialogContainer');
     this.show(false);
@@ -14,20 +16,26 @@ class Dialog {
     closeButton.addEventListener('click', () => {
       this.show(false);
     });
+    if (opts.gaEvent) {
+      this._gaEvent = opts.gaEvent;
+    }
   }
   /**
    * Shows or hides the dialog.
-   * @param {boolean} [visible] - Show or hides the dialog.
+   * @param {boolean=} visible - Show or hides the dialog (false).
    */
   show(visible) {
-    gaEvent('Dialog', this.elem.id);
     this.container.classList.toggle('hidden', !visible);
     this.elem.classList.toggle('hidden', !visible);
+    if (visible && this._gaEvent) {
+      this._gaEvent('Dialog', this.elem.id);
+    }
   }
 }
 
 window.addEventListener('load', () => {
-  const aboutDialog = new Dialog('#dialogAbout');
+  // eslint-disable-next-line no-undef
+  const aboutDialog = new Dialog('#dialogAbout', {gaEvent});
   document.querySelector('#butAbout').addEventListener('click', () => {
     aboutDialog.show(true);
   });

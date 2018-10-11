@@ -1,3 +1,5 @@
+/* eslint-env node */
+
 'use strict';
 
 const del = require('del');
@@ -7,7 +9,7 @@ const semver = require('semver');
 const csso = require('gulp-csso');
 const copy = require('gulp-copy');
 const babel = require('gulp-babel');
-const colors = require('ansi-colors');
+const eslint = require('gulp-eslint');
 const uglify = require('gulp-uglify');
 const connect = require('gulp-connect');
 const htmlmin = require('gulp-htmlmin');
@@ -23,14 +25,20 @@ const SRC_DIR = 'src';
 const DEST_DIR = 'build';
 const TEMP_DIR = '.tmp';
 
+/**
+ * Bumps the version number in the package.json file.
+ *
+ * @param {string} release - Type of release patch|minor|major.
+ * @return {Promise}.
+ */
 function bumpVersion(release) {
-  return fs.readJson('./package.json')
-    .then((data) => {
-      const currentVersion = data.version;
-      const nextVersion = semver.inc(currentVersion, release);
-      data.version = nextVersion;
-      return fs.writeJson('./package.json', data, {spaces: 2});
-    });
+  return fs.readJson('package.json')
+      .then((data) => {
+        const currentVersion = data.version;
+        const nextVersion = semver.inc(currentVersion, release);
+        data.version = nextVersion;
+        return fs.writeJson('package.json', data, {spaces: 2});
+      });
 }
 
 gulp.task('bump:patch', () => {
@@ -47,13 +55,26 @@ gulp.task('clean:build', () => {
   return del(filesToDelete);
 });
 
-gulp.task('clean', (cb) => {
-  return runSequence(['clean:temp', 'clean:build'], cb);
+gulp.task('clean', ['clean:build', 'clean:temp']);
+
+gulp.task('lint', () => {
+  const filesToLint = [
+    'gulpfile.js',
+    'src/index.html',
+    'src/scripts/*',
+  ];
+  const config = {
+    useEslintrc: true,
+  };
+  return gulp.src(filesToLint)
+      .pipe(eslint(config))
+      .pipe(eslint.format())
+      .pipe(eslint.failAfterError());
 });
 
 gulp.task('css-build', () => {
   const autoprefixOpts = {
-    browsers: ['last 2 versions']
+    browsers: ['last 2 versions'],
   };
   const cssoOpts = {
     sourceMap: true,
@@ -71,7 +92,7 @@ gulp.task('js-build', () => {
     compress: {
       drop_console: true,
       warnings: true,
-    }
+    },
   };
   return gulp.src(`${SRC_DIR}/scripts/*.js`)
       .pipe(sourcemaps.init())

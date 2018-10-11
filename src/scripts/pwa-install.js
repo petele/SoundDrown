@@ -5,30 +5,43 @@ class PWAInstaller {
   /**
    * Set up the add to home screen elements.
    * @param {string} selector - The selector to the dialog element.
+   * @param {Object=} opts - Options used when creating generator.
+   * @param {Function=} opts.gaEvent - For tracking Google Analytics events.
    */
-  constructor(selector) {
-    this.deferredEvent;
-    this.installButton = document.querySelector(selector);
+  constructor(selector, opts = {}) {
+    this._deferredEvent;
+    this._installButton = document.querySelector(selector);
+    if (opts.gaEvent) {
+      this._gaEvent = opts.gaEvent;
+    }
     window.addEventListener('beforeinstallprompt', (e) => {
-      this.deferredEvent = e;
-      this.installButton.classList.toggle('hidden', false);
-      gaEvent('InstallButton', 'shown');
+      this._deferredEvent = e;
+      this._installButton.classList.toggle('hidden', false);
+      if (this._gaEvent) {
+        this._gaEvent('InstallButton', 'shown');
+      }
     });
     window.addEventListener('appinstalled', (e) => {
-      gaEvent('InstallEvent', 'installed');
       this.hideButton();
+      if (this._gaEvent) {
+        this._gaEvent('InstallEvent', 'installed');
+      }
     });
-    this.installButton.addEventListener('click', (e) => {
+    this._installButton.addEventListener('click', (e) => {
       this.hideButton();
       if (!this.deferredEvent) {
         return;
       }
-      this.deferredEvent.prompt();
-      this.deferredEvent.userChoice.then((result) => {
-        gaEvent('InstallPromptResponse', result.outcome);
-        this.deferredEvent = null;
+      this._deferredEvent.prompt();
+      this._deferredEvent.userChoice.then((result) => {
+        this._deferredEvent = null;
+        if (this._gaEvent) {
+          this._gaEvent('InstallPromptResponse', result.outcome);
+        }
       });
-      gaEvent('InstallButton', 'clicked');
+      if (this._gaEvent) {
+        this._gaEvent('InstallButton', 'clicked');
+      }
     });
   }
   /**
@@ -40,5 +53,6 @@ class PWAInstaller {
 }
 
 window.addEventListener('load', () => {
-  new PWAInstaller('#butInstall');
+  // eslint-disable-next-line no-undef
+  new PWAInstaller('#butInstall', {gaEvent});
 });

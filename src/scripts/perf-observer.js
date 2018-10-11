@@ -4,9 +4,9 @@
  * Logs an event to Google Analytics.
  * @param {string} category - The object that was interacted with.
  * @param {string} action - The type of interaction.
- * @param {string} label - Useful for categorizing events.
- * @param {number} value - A numeric value associated with the event.
- * @param {boolean} nonInteraction - Indicates a non-interaction event.
+ * @param {string=} label - Useful for categorizing events.
+ * @param {number=} value - A numeric value associated with the event.
+ * @param {boolean=} nonInteraction - Indicates a non-interaction event.
  */
 function gaEvent(category, action, label, value, nonInteraction) {
   console.log('🔔', category, action, label, value);
@@ -26,6 +26,7 @@ function gaEvent(category, action, label, value, nonInteraction) {
   if (nonInteraction) {
     obj.nonInteraction = true;
   }
+  // eslint-disable-next-line no-undef
   ga('send', 'event', obj);
 }
 
@@ -85,5 +86,6 @@ window.addEventListener('load', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
+  // eslint-disable-next-line no-undef
   ga('send', 'pageview', '/');
 });

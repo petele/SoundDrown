@@ -1,20 +1,18 @@
-/* eslint no-unused-vars: "off" */
-
 'use strict';
 
 /**
  * Class representing a Binaural Noise Generator.
  * @see {@link https://github.com/ichabodcole/BinauralBeatJS}
  */
-class BinauralBeatJS {
+class BinauralBeatJS { // eslint-disable-line no-unused-vars
   /**
    * Create a Binaural Noise object.
    * @param {AudioContext} audioContext - A initialized audio context.
-   * @param {Object} [opts] - The options object.
-   * @param {number} [opts.pitch] - The frequency (Hz) of the pitch.
-   * @param {number} [opts.beatRate] - How many beats to show.
-   * @param {string} [opts.waveType] - *sine*|square|sawtooth|triangle.
-   * @param {boolean} [opts.compressNodes] - Unknown.
+   * @param {Object=} opts - @see {@link Noise}.
+   * @param {number=} opts.pitch - The frequency (Hz) of the pitch (440).
+   * @param {number=} opts.beatRate - How many beats to show (5).
+   * @param {string=} opts.waveType - sine|square|sawtooth|triangle (sine).
+   * @param {boolean=} opts.compressNodes - Unknown (false).
    */
   constructor(audioContext, opts = {}) {
     this.SINE = 'sine';
