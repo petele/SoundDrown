@@ -18,6 +18,7 @@ class Noise {
    * @param {string} name - Name of the sound generator.
    * @param {Object} [opts] - Options used when creating generator.
    * @param {string} [opts.buttonSelector] - The selector for the button.
+   * @param {function} [opts.gaEvent] - For tracking Google Analytics events.
    */
   constructor(name, opts = {}) {
     this.name = name;
@@ -30,6 +31,9 @@ class Noise {
     this.startedAt = 0;
     if (opts.buttonSelector) {
       this.button = document.querySelector(opts.buttonSelector);
+    }
+    if (opts.gaEvent) {
+      this.gaEvent = opts.gaEvent;
     }
   }
   /**
@@ -63,11 +67,15 @@ class Noise {
     if (play) {
       this.audioContext.resume();
       this.startedAt = Date.now();
-      gaEvent('Noise', 'start', this.name);
+      if (this.gaEvent) {
+        this.gaEvent('Noise', 'start', this.name);
+      }
     } else {
       this.audioContext.suspend();
-      const duration = Math.round((Date.now() - this.startedAt) / 1000);
-      gaEvent('Noise', 'duration', this.name, duration);
+      if (this.gaEvent) {
+        const duration = Math.round((Date.now() - this.startedAt) / 1000);
+        gaEvent('Noise', 'duration', this.name, duration);
+      }
     }
     this.playing = play;
     if (this.button) {
@@ -233,8 +241,10 @@ function updateNoiseButtonState(button, isPlaying) {
 
 /**
  * Setup the Media Session API.
+ * @param {object} [opts] - Options param.
+ * @param {function} [opts.gaEvent] - For tracking Google Analytics events.
  */
-function setupMediaSession() {
+function setupMediaSession(opts = {}) {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: 'SoundDrown',
@@ -256,7 +266,9 @@ function setupMediaSession() {
     });
     soundDrownApp.audioElement = document.querySelector('audio');
     soundDrownApp.audioElement.src = '/sounds/silence.mp3';
-    gaEvent('MediaSession', 'enabled');
+    if (opt.gaEvent) {
+      opts.gaEvent('MediaSession', 'enabled');
+    }
   }
 }
 
