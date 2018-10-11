@@ -83,12 +83,10 @@ class MediaSessionController {
     // eslint-disable-next-line no-undef
     navigator.mediaSession.metadata = new MediaMetadata(defaultMetadata);
     navigator.mediaSession.setActionHandler('play', (evt) => {
-      console.log('🔈', 'actionHandler:play', evt);
       this._handlePlay(evt);
     });
     navigator.mediaSession.setActionHandler('pause', (evt) => {
-      console.log('🔈', 'actionHandler:pause', evt);
-      this.handlePause(evt);
+      this._handlePause(evt);
     });
   }
   /**
@@ -120,7 +118,6 @@ class MediaSessionController {
     if ((start && this.playing) || (!start && !this.playing)) {
       return this.playing;
     }
-    console.log('🔈', '_toggleAudioElem', start);
     if (start) {
       this._audioElement.play();
       return true;
