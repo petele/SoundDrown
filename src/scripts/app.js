@@ -258,15 +258,19 @@ function setupMediaSession(opts = {}) {
     });
     navigator.mediaSession.setActionHandler('play', () => {
       mediaSessionPlay();
-      gaEvent('MediaSessionAPI', 'play');
+      if (opts.gaEvent) {
+        opts.gaEvent('MediaSessionAPI', 'play');
+      }
     });
     navigator.mediaSession.setActionHandler('pause', () => {
       mediaSessionPause();
-      gaEvent('MediaSessionAPI', 'pause');
+      if (opts.gaEvent) {
+        opts.gaEvent('MediaSessionAPI', 'pause');
+      }
     });
     soundDrownApp.audioElement = document.querySelector('audio');
     soundDrownApp.audioElement.src = '/sounds/silence.mp3';
-    if (opt.gaEvent) {
+    if (opts.gaEvent) {
       opts.gaEvent('MediaSession', 'enabled');
     }
   }
