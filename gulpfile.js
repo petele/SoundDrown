@@ -26,6 +26,10 @@ const SRC_DIR = 'src';
 const DEST_DIR = 'build';
 const TEMP_DIR = '.tmp';
 
+/** ***************************************************************************
+ * Bump Version Number
+ *****************************************************************************/
+
 /**
  * Bumps the version number in the package.json file.
  *
@@ -46,6 +50,11 @@ gulp.task('bump:patch', () => {
   return bumpVersion('patch');
 });
 
+
+/** ***************************************************************************
+ * Clean
+ *****************************************************************************/
+
 gulp.task('clean:temp', () => {
   const filesToDelete = ['.tmp/**'];
   return del(filesToDelete);
@@ -62,6 +71,11 @@ gulp.task('clean:docs', () => {
 });
 
 gulp.task('clean', ['clean:build', 'clean:temp', 'clean:docs']);
+
+
+/** ***************************************************************************
+ * Linting & Doc Generation
+ *****************************************************************************/
 
 gulp.task('lint', () => {
   const filesToLint = [
@@ -88,6 +102,46 @@ gulp.task('jsdoc', ['clean:docs', 'lint'], () => {
       .pipe(jsdoc(config));
 });
 
+
+/** ***************************************************************************
+ * Generate Service Worker
+ *****************************************************************************/
+
+gulp.task('generate-service-worker', () => {
+  return workbox.generateSW({
+    globDirectory: DEST_DIR,
+    globPatterns: [
+      '**/*.{html,js,png,ico,mp3,json}',
+    ],
+    globIgnores: [
+      'icons/**/*',
+      'manifest.json',
+    ],
+    swDest: `${DEST_DIR}/service-worker.js`,
+    clientsClaim: true,
+    skipWaiting: true,
+    offlineGoogleAnalytics: true,
+    runtimeCaching: [
+      {
+        urlPattern: /^https:\/\/fonts\.gstatic\.com/,
+        handler: 'cacheFirst',
+        options: {
+          cacheName: 'googleapis',
+          expiration: {maxEntries: 30},
+        },
+      },
+    ],
+  }).then(({warnings}) => {
+    for (const warning of warnings) {
+      console.log(warning);
+    }
+  });
+});
+
+
+/** ***************************************************************************
+ * Build
+ *****************************************************************************/
 
 gulp.task('css-build', () => {
   const autoprefixOpts = {
@@ -157,6 +211,7 @@ gulp.task('copy-static', () => {
   const filesToCopy = [
     `${TEMP_DIR}/index.html`,
     `${TEMP_DIR}/maps/**/*`,
+    `${SRC_DIR}/icons/**/*`,
     `${SRC_DIR}/images/**/*`,
     `${SRC_DIR}/sounds/**/*`,
     `${SRC_DIR}/manifest.json`,
@@ -167,33 +222,6 @@ gulp.task('copy-static', () => {
       .pipe(copy(DEST_DIR, {prefix: 1}));
 });
 
-gulp.task('generate-service-worker', () => {
-  return workbox.generateSW({
-    globDirectory: DEST_DIR,
-    globPatterns: [
-      '**/*.{html,js,png,ico,mp3,json}',
-    ],
-    swDest: `${DEST_DIR}/service-worker.js`,
-    clientsClaim: true,
-    skipWaiting: true,
-    offlineGoogleAnalytics: true,
-    runtimeCaching: [
-      {
-        urlPattern: /^https:\/\/fonts\.gstatic\.com/,
-        handler: 'cacheFirst',
-        options: {
-          cacheName: 'googleapis',
-          expiration: {maxEntries: 30},
-        },
-      },
-    ],
-  }).then(({warnings}) => {
-    for (const warning of warnings) {
-      console.log(warning);
-    }
-  });
-});
-
 gulp.task('build:no-sw', ['clean'], (cb) => {
   return runSequence('html-build', 'copy-static', cb);
 });
@@ -202,6 +230,11 @@ gulp.task('build', (cb) => {
   return runSequence('build:no-sw', 'generate-service-worker', cb);
 });
 
+
+/** ***************************************************************************
+ * Development - serving
+ *****************************************************************************/
+
 gulp.task('serve', () => {
   return connect.server({root: 'src'});
 });
@@ -209,6 +242,11 @@ gulp.task('serve', () => {
 gulp.task('serve:prod', ['build:no-sw'], () => {
   return connect.server({root: 'build'});
 });
+
+
+/** ***************************************************************************
+ * Deploy
+ *****************************************************************************/
 
 gulp.task('deploy-firebase', () => {
   return firebase.deploy();
