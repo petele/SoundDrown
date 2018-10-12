@@ -21,8 +21,8 @@ class Noise {
    * Create a Noise object.
    * @param {string} name - Name of the noise generator.
    * @param {Object} [opts] - Options used when creating generator.
-   * @param {string} [opts.buttonSelector] - The selector for the button.
    * @param {number} [opts.bufferSize=1024] - Size of WebAudio buffer.
+   * @param {Button} [opts.button] - Button element that toggles the noise.
    * @param {Function} [opts.gaEvent] - For tracking Google Analytics events.
    */
   constructor(name, opts = {}) {
@@ -30,13 +30,10 @@ class Noise {
     this._playing = false;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     this._audioContext = new AudioContext();
-    this._opts = opts;
-    this._bufferSize = opts.bufferSize || 1024;
     this._noiseGenerator = this._getGenerator(opts);
     this._noiseGenerator.connect(this._audioContext.destination);
-    this._startedAt = 0;
-    if (opts.buttonSelector) {
-      this._button = document.querySelector(opts.buttonSelector);
+    if (opts.button) {
+      this._button = opts.button;
     }
     if (opts.gaEvent) {
       this._gaEvent = opts.gaEvent;
@@ -150,15 +147,17 @@ class WhiteNoise extends Noise {
   /**
    * Creates the web audio node.
    * @override
+   * @param {Object} [opts={}] - See {@link Noise}
    * @return {ScriptProcessorNode} The newly created node.
    * @see https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode
    */
-  _getGenerator() {
+  _getGenerator(opts = {}) {
     const context = this._audioContext;
-    const noise = context.createScriptProcessor(this._bufferSize, 1, 1);
+    const bufferSize = opts.bufferSize || 1024;
+    const noise = context.createScriptProcessor(bufferSize, 1, 1);
     noise.addEventListener('audioprocess', (e) => {
       const output = e.outputBuffer.getChannelData(0);
-      for (let i = 0; i < this._bufferSize; i++) {
+      for (let i = 0; i < bufferSize; i++) {
         output[i] = Math.random() * 2 - 1;
       }
     });
@@ -181,12 +180,14 @@ class PinkNoise extends Noise {
   /**
    * Creates the web audio node.
    * @override
+   * @param {Object} [opts={}] - See {@link Noise}
    * @return {ScriptProcessorNode} The newly created node.
    * @see https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode
    */
-  _getGenerator() {
+  _getGenerator(opts = {}) {
     const context = this._audioContext;
-    const noise = context.createScriptProcessor(this._bufferSize, 1, 1);
+    const bufferSize = opts.bufferSize || 1024;
+    const noise = context.createScriptProcessor(bufferSize, 1, 1);
     let b0 = 0;
     let b1 = 0;
     let b2 = 0;
@@ -196,7 +197,7 @@ class PinkNoise extends Noise {
     let b6 = 0;
     noise.addEventListener('audioprocess', (e) => {
       const output = e.outputBuffer.getChannelData(0);
-      for (let i = 0; i < this._bufferSize; i++) {
+      for (let i = 0; i < bufferSize; i++) {
         const white = Math.random() * 2 - 1;
         b0 = 0.98975 * b0 + white * 0.0555178;
         b1 = 0.99342 * b1 + white * 0.0750757;
@@ -227,16 +228,18 @@ class BrownNoise extends Noise {
   /**
    * Creates the web audio node.
    * @override
+   * @param {Object} [opts={}] - See {@link Noise}
    * @return {AudioNode} The newly created node.
    * @see https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode
    */
-  _getGenerator() {
+  _getGenerator(opts = {}) {
     const context = this._audioContext;
-    const noise = context.createScriptProcessor(this._bufferSize, 1, 1);
+    const bufferSize = opts.bufferSize || 1024;
+    const noise = context.createScriptProcessor(bufferSize, 1, 1);
     let lastOut = 0.0;
     noise.addEventListener('audioprocess', (e) => {
       const output = e.outputBuffer.getChannelData(0);
-      for (let i = 0; i < this._bufferSize; i++) {
+      for (let i = 0; i < bufferSize; i++) {
         const white = Math.random() * 2 - 1;
         output[i] = (lastOut + (0.0207 * white)) / 1.018;
         lastOut = output[i];
@@ -352,17 +355,17 @@ class BinauralTone extends Noise {
 /**
  * Helper class to simplify setting up a node.
  * @param {string} key - Key to use for soundDrownNoises object.
- * @param {string} selector - Query selector for the noise toggle button.
+ * @param {string} buttonID - ID for the button element for the noise toggler.
  * @param {Class} NoiseClass - The noise generator class to create & use.
  * @return {Promise} - Resolves once things are setup.
  */
-function setupNoise(key, selector, NoiseClass) {
+function setupNoise(key, buttonID, NoiseClass) {
   return new Promise((resolve) => {
+    const button = document.getElementById(buttonID);
     const opts = {
-      buttonSelector: selector,
+      button: button,
       gaEvent: gaEvent, // eslint-disable-line no-undef
     };
-    const button = document.querySelector(selector);
     button.addEventListener('click', () => {
       let noise = soundDrownNoises[key];
       if (!noise) {
@@ -379,10 +382,10 @@ function setupNoise(key, selector, NoiseClass) {
 
 window.addEventListener('load', (e) => {
   const promises = [];
-  promises.push(setupNoise('wn', '#butWhite', WhiteNoise));
-  promises.push(setupNoise('pn', '#butPink', PinkNoise));
-  promises.push(setupNoise('bn', '#butBrown', BrownNoise));
-  promises.push(setupNoise('bi', '#butBinaural', BinauralTone));
+  promises.push(setupNoise('wn', 'butWhite', WhiteNoise));
+  promises.push(setupNoise('pn', 'butPink', PinkNoise));
+  promises.push(setupNoise('bn', 'butBrown', BrownNoise));
+  promises.push(setupNoise('bi', 'butBinaural', BinauralTone));
   Promise.all(promises).then(() => {
     if ('performance' in window) {
       const pNow = Math.round(performance.now());

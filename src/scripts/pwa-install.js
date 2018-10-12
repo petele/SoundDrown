@@ -4,16 +4,16 @@
 class PWAInstaller {
   /**
    * Set up the add to home screen elements.
-   * @param {string} [selector] - The selector to the dialog element. If no
+   * @param {string} [buttonID] - The element ID to the button element. If no
    * selector is provided, no visual indication will be made that the PWA is
    * installable.
    * @param {Object} [opts] - Options used when creating generator.
    * @param {Function} [opts.gaEvent] - For tracking Google Analytics events.
    */
-  constructor(selector, opts = {}) {
+  constructor(buttonID, opts = {}) {
     this._deferredEvent;
-    if (selector) {
-      this._installButton = document.querySelector(selector);
+    if (buttonID) {
+      this._installButton = document.getElementById(buttonID);
     }
     if (opts.gaEvent) {
       this._gaEvent = opts.gaEvent;
@@ -88,5 +88,5 @@ class PWAInstaller {
 
 window.addEventListener('load', () => {
   // eslint-disable-next-line no-undef
-  new PWAInstaller('#butInstall', {gaEvent});
+  new PWAInstaller('butInstall', {gaEvent});
 });
