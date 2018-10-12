@@ -30,44 +30,18 @@ function gaEvent(category, action, label, value, nonInteraction) {
   ga('send', 'event', obj);
 }
 
-
-if ('PerformanceObserver' in window) {
-  const paintObserver = new PerformanceObserver((list) => {
-    for (const entry of list.getEntries()) {
-      const metricName = entry.name;
-      const time = Math.round(entry.startTime + entry.duration);
-      gaEvent('Performance Metrics', metricName, null, time, true);
-    }
-  });
-  paintObserver.observe({entryTypes: ['paint']});
-
-  // const resourceObserver = new PerformanceObserver((list) => {
-  //   for (const entry of list.getEntries()) {
-  //     // console.log('re', entry)
-  //     const name = entry.name;
-  //     const time = Math.round(entry.startTime + entry.duration);
-  //     gaEvent('Performance Metrics', 'Resource Loading', name, time, true);
-  //   }
-  // });
-  // resourceObserver.observe({entryTypes: ['resource']});
-
-  // const longTaskObserver = new PerformanceObserver((list) => {
-  //   for (const entry of list.getEntries()) {
-  //     const attribution = JSON.stringify(entry.attribution);
-  //     const time = Math.round(entry.startTime + entry.duration);
-  //     gaEvent('Long Task', attribution, null, time, true);
-  //   }
-  // });
-  // longTaskObserver.observe({entryTypes: ['longtask']});
-}
-
-window.addEventListener('load', () => {
-  if ('performance' in window) {
-    const pNow = Math.round(performance.now());
-    gaEvent('Performance Metrics', 'window-load', null, pNow);
-  }
+/**
+ * Fires the Google Analytics page view
+ */
+window.addEventListener('DOMContentLoaded', () => {
+  // eslint-disable-next-line no-undef
+  ga('send', 'pageview', '/');
 });
 
+/**
+ * Analytics for window type: browser, standalone, standalone-ios
+ * DELAYED - fires after 5 seconds.
+ */
 window.addEventListener('load', () => {
   setTimeout(() => {
     if (window.navigator.standalone === true) {
@@ -82,8 +56,23 @@ window.addEventListener('load', () => {
   }, 5000);
 });
 
-
-window.addEventListener('DOMContentLoaded', () => {
-  // eslint-disable-next-line no-undef
-  ga('send', 'pageview', '/');
+/**
+ * Performance analytics
+ * DELAYED - fires after 3 seconds.
+ */
+window.addEventListener('load', () => {
+  if ('performance' in window) {
+    const pNow = Math.round(performance.now());
+    setTimeout(() => {
+      gaEvent('Performance Metrics', 'window-load', null, pNow);
+      const paintMetrics = performance.getEntriesByType('paint');
+      if (paintMetrics && paintMetrics.length > 0) {
+        paintMetrics.forEach((entry) => {
+          const name = entry.name;
+          const time = Math.round(entry.startTime + entry.duration);
+          gaEvent('Performance Metrics', name, null, time, true);
+        });
+      }
+    }, 3000);
+  }
 });
