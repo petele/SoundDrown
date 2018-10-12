@@ -115,7 +115,6 @@ gulp.task('generate-service-worker', () => {
     ],
     globIgnores: [
       'icons/**/*',
-      'manifest.json',
     ],
     swDest: `${DEST_DIR}/service-worker.js`,
     clientsClaim: true,

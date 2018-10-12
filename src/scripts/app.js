@@ -28,18 +28,19 @@ class Noise {
   constructor(name, opts = {}) {
     this._name = name;
     this._playing = false;
-    this.destinationConnected = false;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     this._audioContext = new AudioContext();
     this._opts = opts;
     this._bufferSize = opts.bufferSize || 1024;
     this._noiseGenerator = this._getGenerator(opts);
+    this._noiseGenerator.connect(this._audioContext.destination);
     this._startedAt = 0;
     if (opts.buttonSelector) {
       this._button = document.querySelector(opts.buttonSelector);
     }
     if (opts.gaEvent) {
       this._gaEvent = opts.gaEvent;
+      this._gaEvent('Noise', 'initialized', this.name);
     }
   }
   /**
@@ -100,19 +101,15 @@ class Noise {
     if (this.playing) {
       return true;
     }
-    if (!this._destinationConnected) {
-      this._noiseGenerator.connect(this._audioContext.destination);
-      this._destinationConnected = true;
-    }
-    this._noiseGenerator.connect(this._audioContext.destination);
     this._audioContext.resume();
     this._startedAt = Date.now();
-    if (this._gaEvent) {
-      this._gaEvent('Noise', 'start', this.name);
-    }
     this._playing = true;
     if (this._button) {
       this._button.classList.toggle('on', true);
+      this._button.setAttribute('aria-checked', 'true');
+    }
+    if (this._gaEvent) {
+      this._gaEvent('Noise', 'start', this.name);
     }
     return true;
   }
@@ -125,14 +122,14 @@ class Noise {
       return false;
     }
     this._audioContext.suspend();
-    if (this._gaEvent) {
-      const duration = Math.round((Date.now() - this._startedAt) / 1000);
-      this._gaEvent('Noise', 'duration', this.name, duration);
-    }
     this._playing = false;
     if (this._button) {
       this._button.classList.toggle('on', false);
-      // updateNoiseButtonState(this._button, false);
+      this._button.setAttribute('aria-checked', 'false');
+    }
+    if (this._gaEvent) {
+      const duration = Math.round((Date.now() - this._startedAt) / 1000);
+      this._gaEvent('Noise', 'duration', this.name, duration);
     }
     return false;
   }
@@ -305,10 +302,11 @@ class BinauralTone extends Noise {
     this.setFrequency(this._frequency, this._freqDiff);
 
     // Connect the channels & start the sound
+    this._oscillatorsStarted = false;
     this._leftChannel.connect(this._channelMerger, 0, 0);
     this._rightChannel.connect(this._channelMerger, 0, 1);
-    this._leftChannel.start(0);
-    this._rightChannel.start(0);
+    this._leftChannel.start();
+    this._rightChannel.start();
 
     return this._channelMerger;
   }
@@ -352,58 +350,39 @@ class BinauralTone extends Noise {
 }
 
 /**
- * Remove the disabled attribute from the button and adds an event.
- * handler to toggle the specified noise.
- * @param {string} selector - Button selector.
- * @param {AudioNode} noise - The noise class.
+ * Helper class to simplify setting up a node.
+ * @param {string} key - Key to use for soundDrownNoises object.
+ * @param {string} selector - Query selector for the noise toggle button.
+ * @param {Class} NoiseClass - The noise generator class to create & use.
+ * @return {Promise} - Resolves once things are setup.
  */
-function setupNoiseButton(selector, noise) {
-  const button = document.querySelector(selector);
-  button.removeAttribute('disabled');
-  button.addEventListener('click', () => {
-    noise.toggle();
-    mediaSessionController.updatePlayState();
+function setupNoise(key, selector, NoiseClass) {
+  return new Promise((resolve) => {
+    const opts = {
+      buttonSelector: selector,
+      gaEvent: gaEvent, // eslint-disable-line no-undef
+    };
+    const button = document.querySelector(selector);
+    button.addEventListener('click', () => {
+      let noise = soundDrownNoises[key];
+      if (!noise) {
+        noise = new NoiseClass(opts);
+        soundDrownNoises[key] = noise;
+      }
+      noise.toggle();
+      mediaSessionController.updatePlayState();
+    });
+    button.removeAttribute('disabled');
+    resolve(true);
   });
 }
 
 window.addEventListener('load', (e) => {
   const promises = [];
-  promises.push(new Promise((resolve) => {
-    const opts = {
-      buttonSelector: '#butWhite',
-      gaEvent: gaEvent, // eslint-disable-line no-undef
-    };
-    soundDrownNoises.wn = new WhiteNoise(opts);
-    setupNoiseButton('#butWhite', soundDrownNoises.wn);
-    resolve(true);
-  }));
-  promises.push(new Promise((resolve) => {
-    const opts = {
-      buttonSelector: '#butPink',
-      gaEvent: gaEvent, // eslint-disable-line no-undef
-    };
-    soundDrownNoises.pn = new PinkNoise(opts);
-    setupNoiseButton('#butPink', soundDrownNoises.pn);
-    resolve(true);
-  }));
-  promises.push(new Promise((resolve) => {
-    const opts = {
-      buttonSelector: '#butBrown',
-      gaEvent: gaEvent, // eslint-disable-line no-undef
-    };
-    soundDrownNoises.bn = new BrownNoise(opts);
-    setupNoiseButton('#butBrown', soundDrownNoises.bn);
-    resolve(true);
-  }));
-  promises.push(new Promise((resolve) => {
-    const opts = {
-      buttonSelector: '#butBinaural',
-      gaEvent: gaEvent, // eslint-disable-line no-undef
-    };
-    soundDrownNoises.bi = new BinauralTone(opts);
-    setupNoiseButton('#butBinaural', soundDrownNoises.bi);
-    resolve(true);
-  }));
+  promises.push(setupNoise('wn', '#butWhite', WhiteNoise));
+  promises.push(setupNoise('pn', '#butPink', PinkNoise));
+  promises.push(setupNoise('bn', '#butBrown', BrownNoise));
+  promises.push(setupNoise('bi', '#butBinaural', BinauralTone));
   Promise.all(promises).then(() => {
     if ('performance' in window) {
       const pNow = Math.round(performance.now());
