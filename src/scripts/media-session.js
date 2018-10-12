@@ -1,7 +1,7 @@
 'use strict';
 
 /** Media Session API Controller Class. */
-class MediaSessionController {
+class MediaSessionController { // eslint-disable-line no-unused-vars
   /**
    * Create a MediaSession controller.
    * @param {Object} noises - A object of noise objects.
@@ -181,11 +181,3 @@ class MediaSessionController {
     return false;
   }
 }
-
-
-window.addEventListener('load', () => {
-  // eslint-disable-next-line no-undef
-  const opts = {gaEvent: gaEvent};
-  // eslint-disable-next-line no-unused-vars, no-undef
-  mediaSessionController = new MediaSessionController(soundDrownNoises, opts);
-});
