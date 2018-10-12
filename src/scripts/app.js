@@ -28,13 +28,12 @@ class Noise {
   constructor(name, opts = {}) {
     this._name = name;
     this._playing = false;
+    this.destinationConnected = false;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     this._audioContext = new AudioContext();
-    this._audioContext.suspend();
     this._opts = opts;
     this._bufferSize = opts.bufferSize || 1024;
     this._noiseGenerator = this._getGenerator(opts);
-    this._noiseGenerator.connect(this._audioContext.destination);
     this._startedAt = 0;
     if (opts.buttonSelector) {
       this._button = document.querySelector(opts.buttonSelector);
@@ -101,6 +100,11 @@ class Noise {
     if (this.playing) {
       return true;
     }
+    if (!this._destinationConnected) {
+      this._noiseGenerator.connect(this._audioContext.destination);
+      this._destinationConnected = true;
+    }
+    this._noiseGenerator.connect(this._audioContext.destination);
     this._audioContext.resume();
     this._startedAt = Date.now();
     if (this._gaEvent) {
@@ -109,7 +113,6 @@ class Noise {
     this._playing = true;
     if (this._button) {
       this._button.classList.toggle('on', true);
-      // updateNoiseButtonState(this._button, true);
     }
     return true;
   }
