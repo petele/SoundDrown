@@ -175,3 +175,29 @@ header h1 {
   margin-right: 1em;
 }
 
+#iosInstallBanner {
+  background-color: var(--app-header-bg);
+  bottom: 0;
+  box-sizing: border-box;
+  color: white;
+  padding: 1.5em 1em;
+  position: fixed;
+  width: 100%;
+  transform: translateY(250px);
+  transition-property: transform;
+  transition-duration: 0.4s;
+}
+#iosInstallBanner button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 2em;
+  padding: 0 0 16px 16px;
+  position: absolute;
+  right: 0;
+  text-align: center;
+  top: -6px;
+}
+#iosInstallBanner.iosInstallVisible {
+  transform: translateY(0);
+}

@@ -12,23 +12,33 @@ class IOSInstaller {
    */
   constructor(buttonID, opts = {}) {
     if (!this.canInstall) {
-      console.log('not supported');
       return;
     }
     if (this.isInstalled) {
-      console.log('already installed');
       return;
     }
-    if (buttonID) {
-      this._installButton = document.getElementById(buttonID);
+    if (!buttonID) {
+      return;
     }
     if (opts.gaEvent) {
       this._gaEvent = opts.gaEvent;
     }
-    this._installButton.addEventListener('click', (e) => {
-      this.showPrompt(e);
+    this._installButton = document.getElementById(buttonID);
+    this._installBanner = document.getElementById('iosInstallBanner');
+    if (!this._installBanner) {
+      return;
+    }
+    this._closeBannerButton = this._installBanner.querySelector('button');
+    this._closeBannerButton.addEventListener('click', () => {
+      this._showPrompt(false);
     });
-    this.showButton();
+    this._installButton.addEventListener('click', () => {
+      this._showPrompt(true);
+      if (this._gaEvent) {
+        this._gaEvent('InstallEvent', 'ios-prompt-shown');
+      }
+    });
+    this._showButton(true);
   }
   /**
    * Is the PWA already installed?
@@ -57,31 +67,31 @@ class IOSInstaller {
   }
   /**
    * Shows the add to home screen prompt (if possible).
-   * @param {Event} evt - The event that initiated the prompt.
+   * @param {boolean} visible - Visibility of the prompt.
    * @return {boolean} If the prompt was shown or not.
    */
-  showPrompt(evt) {
-    // TODO
-    return false;
-  }
-  /**
-   * Makes the install button visible by removing the hidden class.
-   * @return {boolean} If the install button was made visible.
-   */
-  showButton() {
-    if (!this.canInstall || !this._installButton) {
+  _showPrompt(visible) {
+    if (!this._installBanner) {
       return false;
     }
-    this._installButton.classList.toggle('hidden', false);
-    return true;
+    this._installBanner.classList.toggle('iosInstallVisible', visible);
+    this._showButton(false);
+    return !visible;
   }
   /**
-   * Hides the install button.
+   * Toggle visibility of the install button.
+   * @param {boolean} visible - Visibility of the button
+   * @return {boolean} If the install button was made visible.
    */
-  hideButton() {
-    if (this._installButton) {
-      this._installButton.classList.toggle('hidden', true);
+  _showButton(visible) {
+    if (!this._installButton) {
+      return false;
     }
+    const timeout = visible === true ? 0 : 1000;
+    setTimeout(() => {
+      this._installButton.classList.toggle('hidden', !visible);
+    }, timeout);
+    return !visible;
   }
 }
 
