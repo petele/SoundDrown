@@ -8,10 +8,10 @@ class IOSInstallButton extends HTMLElement {
   constructor() {
     super();
 
-    // if (!this.canInstall || this.isInstalled) {
-    //   this.setAttribute('disabled', '');
-    //   return;
-    // }
+    if (!this.canInstall || this.isInstalled) {
+      this.setAttribute('disabled', '');
+      return;
+    }
 
     const innerHTML = `
       <style>

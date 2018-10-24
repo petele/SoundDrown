@@ -9,3 +9,10 @@ An installable, [white noise generation web app](https://sounddrown.app).
 * **Wave form icon** Created by [Cris Dobbins](https://thenounproject.com/crisdobbins/) from the [Noun Project](https://thenounproject.com/term/sound-wave/89710/)
 
 All have been modified or updated to suit my implementation.
+
+
+## TODO
+* [ ] Change some events from load to DOMContentLoaded
+* [ ] Change pwa-install-button to extend a button
+* [ ] Fix building/minifying of ios-install-button.js
+* [ ] Change noise into a custom element

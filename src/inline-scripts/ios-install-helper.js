@@ -7,16 +7,16 @@ window.addEventListener('load', () => {
   const supportsStandAlone = 'standalone' in window.navigator;
 
   if (!supportsStandAlone) {
-    // return;
+    return;
   }
   if (navigator.standalone) {
-    // return;
+    return;
   }
   if (!RE_SAFARI.test(ua)) {
-    // return;
+    return;
   }
   if (!RE_APPLE_DEVICE.test(ua)) {
-    // return;
+    return;
   }
   gaEvent('IOSInstall', 'available');
 
