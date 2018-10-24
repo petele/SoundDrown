@@ -25,7 +25,7 @@ window.addEventListener('load', () => {
   document.head.append(scriptElem);
 
   const button = document.createElement('ios-install-button');
-  button.innerText = 'SoundDrown';
+  button.textContent = 'SoundDrown';
   document.querySelector('.bottom-bar-container').prepend(button);
   button.addEventListener('click-install', (e) => {
     gaEvent('IOSInstall', 'banner-shown');

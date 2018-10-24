@@ -33,7 +33,7 @@ class Dialog {
   }
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('DOMContentLoaded', () => {
   // eslint-disable-next-line no-undef
   const aboutDialog = new Dialog('dialogAbout', {gaEvent});
   document.getElementById('butAbout').addEventListener('click', () => {

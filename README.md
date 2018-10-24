@@ -12,8 +12,8 @@ All have been modified or updated to suit my implementation.
 
 
 ## TODO
-* [ ] Change some events from load to DOMContentLoaded
-* [ ] Change pwa-install-button to extend a button
+* [X] Change some events from load to DOMContentLoaded
+* [X] Change pwa-install-button to extend a button
 * [ ] Fix building/minifying of ios-install-button.js
 * [ ] Change noise into a custom element
 * [ ] Add splash screen for iOS users

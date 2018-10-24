@@ -76,3 +76,11 @@ window.addEventListener('load', () => {
     }, 3000);
   }
 });
+window.addEventListener('DOMContentLoaded', () => {
+  if ('performance' in window) {
+    const pNow = Math.round(performance.now());
+    setTimeout(() => {
+      gaEvent('Performance Metrics', 'dom-content-loaded', null, pNow);
+    }, 3000);
+  }
+});

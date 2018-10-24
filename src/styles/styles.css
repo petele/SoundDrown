@@ -172,14 +172,14 @@ header h1 {
   padding: 0.75em;
 }
 
-pwa-install-button {
+#butPWAInstall {
   margin-right: 1em;
 }
 
-pwa-install-button[disabled] {
+#butPWAInstall[disabled] {
   display: none;
-  margin-right: 0;
 }
+
 
 ios-install-button {
   --banner-color: white;

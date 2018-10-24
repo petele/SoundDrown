@@ -1,7 +1,7 @@
 'use strict';
 
 /** Custom Element to install a PWA. */
-class PWAInstallButton extends HTMLElement {
+class PWAInstallButton extends HTMLButtonElement {
   /**
    * Base constructor.
    */
@@ -76,4 +76,4 @@ class PWAInstallButton extends HTMLElement {
   }
 }
 
-window.customElements.define('pwa-install-button', PWAInstallButton);
+window.customElements.define('pwa-install-button', PWAInstallButton, {extends: 'button'});

@@ -65,7 +65,7 @@ class SoundDrownApp {
   }
 }
 
-window.addEventListener('load', (e) => {
+window.addEventListener('DOMContentLoaded', (e) => {
   // eslint-disable-next-line no-undef
   window.soundDrownApp = new SoundDrownApp({gaEvent});
 });
