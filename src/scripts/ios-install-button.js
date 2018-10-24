@@ -81,7 +81,6 @@ class IOSInstallButton extends HTMLElement {
       }, 1000);
     });
     this.removeAttribute('disabled');
-    this.classList.toggle('hidden', false);
   }
   /**
    * Show or hide the banner
