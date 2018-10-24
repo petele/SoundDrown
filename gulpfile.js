@@ -70,7 +70,9 @@ gulp.task('clean:docs', () => {
   return del(filesToDelete);
 });
 
-gulp.task('clean', ['clean:build', 'clean:temp', 'clean:docs']);
+gulp.task('clean', (cb) => {
+  return runSequence(['clean:build', 'clean:temp', 'clean:docs'], cb);
+});
 
 
 /** ***************************************************************************
@@ -157,7 +159,24 @@ gulp.task('css-build', () => {
       .pipe(gulp.dest(`${TEMP_DIR}/styles/`));
 });
 
-gulp.task('js-build', () => {
+gulp.task('js-inline', () => {
+  const uglifyOpts = {
+    compress: {
+      drop_console: true,
+      warnings: true,
+    },
+  };
+  return gulp.src(`${SRC_DIR}/inline-scripts/*.js`)
+      .pipe(sourcemaps.init())
+      .pipe(babel({
+        presets: ['@babel/env'],
+      }))
+      .pipe(uglify(uglifyOpts))
+      .pipe(sourcemaps.write(`../maps/`))
+      .pipe(gulp.dest(`${TEMP_DIR}/inline-scripts`));
+});
+
+gulp.task('js-script', () => {
   const uglifyOpts = {
     compress: {
       drop_console: true,
@@ -172,6 +191,10 @@ gulp.task('js-build', () => {
       .pipe(uglify(uglifyOpts))
       .pipe(sourcemaps.write(`../maps/`))
       .pipe(gulp.dest(`${TEMP_DIR}/scripts`));
+});
+
+gulp.task('js-build', (cb) => {
+  return runSequence(['js-inline', 'js-script'], cb);
 });
 
 gulp.task('html-copy', () => {
@@ -210,6 +233,7 @@ gulp.task('copy-static', () => {
   const filesToCopy = [
     `${TEMP_DIR}/index.html`,
     `${TEMP_DIR}/maps/**/*`,
+    `${TEMP_DIR}/scripts/**/*`,
     `${SRC_DIR}/icons/**/*`,
     `${SRC_DIR}/images/**/*`,
     `${SRC_DIR}/sounds/**/*`,

@@ -1,26 +1,29 @@
 'use strict';
 
+/** Custom Element to prompt Safari users on iOS to install the PWA. */
 class SDInstallIOS extends HTMLElement {
-
-  // Can define constructor arguments if you wish.
+  /**
+   * Base constructor.
+   */
   constructor() {
     super();
 
     if (!this.canInstall || this.isInstalled) {
       this.setAttribute('disabled', '');
+      this.classList.toggle('hidden', true);
       return;
     }
 
     const innerHTML = `
       <style>
-        #sdInstallIOSButton {
+        #buttonInstall {
           background-color: var(--button-bg-color, blue);
           border: var(--button-border, 1px solid red);
           color: var(--button-color, white);
           font-size: var(--button-font-size, 1em);
           padding: var(--button-padding, 0.75em);
         }
-        #sdInstallIOSBanner {
+        div {
           background-color: var(--banner-bg-color, white);
           bottom: 0;
           box-sizing: border-box;
@@ -33,10 +36,10 @@ class SDInstallIOS extends HTMLElement {
           transition-property: transform;
           transition-duration: 0.4s;
         }
-        #sdInstallIOSBanner.sdInstallIOSBannerVisible {
+        div.visible {
           transform: translateY(0);
         }
-        #sdInstallIOSBanner button {
+        #buttonClose {
           background-color: transparent;
           border: none;
           color: var(--banner-color, black);
@@ -49,39 +52,43 @@ class SDInstallIOS extends HTMLElement {
           top: -6px;
         }
       </style>
-      <button id="sdInstallIOSButton" type="button">Install</button>
+      <button id="buttonInstall" type="button">Install</button>
       <div id="sdInstallIOSBanner">
         To add <slot>this app</slot> to your home screen, press the Share
         button (below), then choose <em>Add to Home Screen</em>.
-        <button type="button">&times;</button>
+        <button id="buttonClose" type="button">&times;</button>
       </div>
     `;
 
     const shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.innerHTML = innerHTML;
 
-    const installButton = shadowRoot.querySelector('#sdInstallIOSButton');
+    const installButton = shadowRoot.querySelector('#buttonInstall');
     installButton.addEventListener('click', () => {
       this._showBanner(true);
       setTimeout(() => {
         installButton.style.display = 'none';
         this.setAttribute('disabled', '');
-      }, 1000);
+      }, 600);
       const e = new Event('click-install', {bubbles: true, composed: true});
       this.dispatchEvent(e);
     });
-    const closeBannerButton = shadowRoot.querySelector('#sdInstallIOSBanner button');
+    const closeBannerButton = shadowRoot.querySelector('#buttonClose');
     closeBannerButton.addEventListener('click', (e) => {
       e.preventDefault(true);
       this._showBanner(false);
     });
+    this.classList.toggle('hidden', false);
   }
-
+  /**
+   * Show or hide the banner
+   * @private
+   * @param {boolean} visible - True to show the banner
+   */
   _showBanner(visible) {
-    const banner = this.shadowRoot.querySelector('#sdInstallIOSBanner');
-    banner.classList.toggle('sdInstallIOSBannerVisible', visible);
+    const banner = this.shadowRoot.querySelector('div');
+    banner.classList.toggle('visible', visible);
   }
-
   /**
    * Is the PWA already installed?
    * @readonly
@@ -107,7 +114,6 @@ class SDInstallIOS extends HTMLElement {
     const supportsStandAlone = 'standalone' in window.navigator;
     return isAppleDevice && isSafari && supportsStandAlone;
   }
-
 }
 
 window.customElements.define('sd-install-ios', SDInstallIOS);

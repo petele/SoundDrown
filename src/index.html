@@ -59,7 +59,7 @@
       ga('create', 'UA-9988000-28', 'auto');
       /* esline-enable */
     </script>
-    <script src="/scripts/perf-observer.js" inline></script>
+    <script src="/inline-scripts/perf-observer.js" inline></script>
 
     <!-- Styles -->
     <link rel="stylesheet" href="/styles/styles.css" inline>
@@ -114,7 +114,6 @@
     </div>
 
     <div class="bottom-bar-container">
-      <!-- <sd-install-ios>SoundDrown</sd-install-ios> -->
       <button id="butInstall" class="hidden" type="button">Install</button>
       <button type="button" id="butAbout">About</button>
     </div>
@@ -198,24 +197,17 @@
           <button type="button">Close</button>
         </div>
       </div>
-    -->
+      -->
     </div>
 
     <script async src="https://www.google-analytics.com/analytics.js"></script>
-    <script src="/scripts/media-session.js" inline></script>
-    <script src="/scripts/noises.js" inline></script>
-    <script src="/scripts/app.js" inline></script>
-    <script src="/scripts/pwa-install.js" inline></script>
-    <script src="/scripts/register-sw.js" inline></script>
-    <script src="/scripts/dialogs.js" inline></script>
-    <script src="/scripts/ios-install.js" inline></script>
-    <!-- <script src="/scripts/sd-install-ios.js" inline></script> -->
-
-    <div id="iosInstallBanner" class="iosInstall">
-      To add SoundDrown to your home screen, press the Share button (below),
-      then choose <em>Add to Home Screen</em>.
-      <button type="button">&times;</button>
-    </div>
+    <script src="/inline-scripts/media-session.js" inline></script>
+    <script src="/inline-scripts/noises.js" inline></script>
+    <script src="/inline-scripts/app.js" inline></script>
+    <script src="/inline-scripts/pwa-install.js" inline></script>
+    <script src="/inline-scripts/register-sw.js" inline></script>
+    <script src="/inline-scripts/dialogs.js" inline></script>
+    <script src="/inline-scripts/load-ios-installer.js" inline></script>
 
   </body>
 </html>

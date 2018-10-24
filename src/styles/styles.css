@@ -176,48 +176,16 @@ header h1 {
   margin-right: 1em;
 }
 
-/*
 sd-install-ios {
   --banner-color: white;
   --banner-bg-color: var(--app-header-bg);
   --button-color: var(--app-button-on);
   --button-border: 1px solid white;
   --button-bg-color: transparent;
-}
-
-sd-install-ios:not(:defined) {
-  display: none;
-}
-
-sd-install-ios:not([disabled]) {
   margin-right: 1em;
 }
-*/
 
+sd-install-ios[disabled] {
+  margin-right: 0;
+}
 
-#iosInstallBanner {
-  background-color: var(--app-header-bg);
-  bottom: 0;
-  box-sizing: border-box;
-  color: white;
-  padding: 1.5em 1em;
-  position: fixed;
-  width: 100%;
-  transform: translateY(250px);
-  transition-property: transform;
-  transition-duration: 0.4s;
-}
-#iosInstallBanner button {
-  background-color: transparent;
-  border: none;
-  color: white;
-  font-size: 2em;
-  padding: 0 0 16px 16px;
-  position: absolute;
-  right: 0;
-  text-align: center;
-  top: -6px;
-}
-#iosInstallBanner.iosInstallVisible {
-  transform: translateY(0);
-}
