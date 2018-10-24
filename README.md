@@ -16,3 +16,4 @@ All have been modified or updated to suit my implementation.
 * [ ] Change pwa-install-button to extend a button
 * [ ] Fix building/minifying of ios-install-button.js
 * [ ] Change noise into a custom element
+* [ ] Add splash screen for iOS users
