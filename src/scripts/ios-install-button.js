@@ -1,18 +1,17 @@
 'use strict';
 
 /** Custom Element to prompt Safari users on iOS to install the PWA. */
-class SDInstallIOS extends HTMLElement {
+class IOSInstallButton extends HTMLElement {
   /**
    * Base constructor.
    */
   constructor() {
     super();
 
-    if (!this.canInstall || this.isInstalled) {
-      this.setAttribute('disabled', '');
-      this.classList.toggle('hidden', true);
-      return;
-    }
+    // if (!this.canInstall || this.isInstalled) {
+    //   this.setAttribute('disabled', '');
+    //   return;
+    // }
 
     const innerHTML = `
       <style>
@@ -22,6 +21,7 @@ class SDInstallIOS extends HTMLElement {
           color: var(--button-color, white);
           font-size: var(--button-font-size, 1em);
           padding: var(--button-padding, 0.75em);
+          margin: var(--button-margin, 0);
         }
         div {
           background-color: var(--banner-bg-color, white);
@@ -68,7 +68,6 @@ class SDInstallIOS extends HTMLElement {
       this._showBanner(true);
       setTimeout(() => {
         installButton.style.display = 'none';
-        this.setAttribute('disabled', '');
       }, 600);
       const e = new Event('click-install', {bubbles: true, composed: true});
       this.dispatchEvent(e);
@@ -77,7 +76,11 @@ class SDInstallIOS extends HTMLElement {
     closeBannerButton.addEventListener('click', (e) => {
       e.preventDefault(true);
       this._showBanner(false);
+      setTimeout(() => {
+        this.setAttribute('disabled', '');
+      }, 1000);
     });
+    this.removeAttribute('disabled');
     this.classList.toggle('hidden', false);
   }
   /**
@@ -116,4 +119,4 @@ class SDInstallIOS extends HTMLElement {
   }
 }
 
-window.customElements.define('sd-install-ios', SDInstallIOS);
+window.customElements.define('ios-install-button', IOSInstallButton);

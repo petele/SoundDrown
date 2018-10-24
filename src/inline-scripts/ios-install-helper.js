@@ -7,27 +7,27 @@ window.addEventListener('load', () => {
   const supportsStandAlone = 'standalone' in window.navigator;
 
   if (!supportsStandAlone) {
-    return;
+    // return;
   }
   if (navigator.standalone) {
-    return;
+    // return;
   }
   if (!RE_SAFARI.test(ua)) {
-    return;
+    // return;
   }
   if (!RE_APPLE_DEVICE.test(ua)) {
-    return;
+    // return;
   }
-  gaEvent('IOSInstallAvailable', 'true');
+  gaEvent('IOSInstall', 'available');
 
   const scriptElem = document.createElement('script');
-  scriptElem.src = '/scripts/sd-install-ios.js';
+  scriptElem.src = '/scripts/ios-install-button.js';
   document.head.append(scriptElem);
 
-  const button = document.createElement('sd-install-ios');
+  const button = document.createElement('ios-install-button');
   button.innerText = 'SoundDrown';
   document.querySelector('.bottom-bar-container').prepend(button);
   button.addEventListener('click-install', (e) => {
-    gaEvent('InstallEvent', 'ios-banner');
+    gaEvent('IOSInstall', 'banner-shown');
   });
 });

@@ -172,20 +172,20 @@ header h1 {
   padding: 0.75em;
 }
 
-#butInstall {
+pwa-install-button {
   margin-right: 1em;
 }
 
-sd-install-ios {
+pwa-install-button[disabled] {
+  display: none;
+  margin-right: 0;
+}
+
+ios-install-button {
   --banner-color: white;
   --banner-bg-color: var(--app-header-bg);
   --button-color: var(--app-button-on);
   --button-border: 1px solid white;
   --button-bg-color: transparent;
-  margin-right: 1em;
+  --button-margin: 0 1em 0 0;
 }
-
-sd-install-ios[disabled] {
-  margin-right: 0;
-}
-
