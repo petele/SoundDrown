@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>SoundDrown</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=contain">
 
     <!-- Pre-connect to font server -->
     <link rel="preconnect" href="https://fonts.gstatic.com/">
@@ -114,7 +114,9 @@
     </div>
 
     <div class="bottom-bar-container">
-      <button is="pwa-install-button" id="butPWAInstall" type="button">Install</button>
+      <button is="pwa-install-button" id="butPWAInstall" type="button" disabled>
+        Install
+      </button>
       <button type="button" id="butAbout">About</button>
     </div>
 

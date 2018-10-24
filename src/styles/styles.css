@@ -48,7 +48,6 @@ body {
 header {
   background-color: var(--app-header-bg);
   color: white;
-  padding-top: env(safe-area-inset-top);
   width: 100%;
 }
 
