@@ -8,7 +8,6 @@ class PWAInstallButton extends HTMLButtonElement {
   constructor() {
     super();
     this._deferredEvent = null;
-    // this.classList.toggle('hidden', true);
     this.setAttribute('disabled', '');
 
     window.addEventListener('beforeinstallprompt', (evt) => {
@@ -36,7 +35,9 @@ class PWAInstallButton extends HTMLButtonElement {
   }
   /**
    * Helper class to fire events.
-   * @param {Object} detail - Details information for the event.
+   * @param {string} action - The type of interaction.
+   * @param {string} [label] - Useful for categorizing events.
+   * @param {number} [value] - A numeric value associated with the event.
    */
   _fireEvent(action, label, value) {
     const opts = {
@@ -65,15 +66,17 @@ class PWAInstallButton extends HTMLButtonElement {
   /**
    * Shows or hide the button.
    * @param {boolean} visible - True to show the button.
-   * @return {boolean} If the prompt was shown or not.
+   * @return {boolean} If the button was shown or not.
    */
   _showButton(visible) {
     if (!!visible && this._deferredEvent) {
       this.removeAttribute('disabled');
-      return;
+      return true;
     }
     this.setAttribute('disabled', '');
+    return false;
   }
 }
 
-window.customElements.define('pwa-install-button', PWAInstallButton, {extends: 'button'});
+window.customElements.define(
+    'pwa-install-button', PWAInstallButton, {extends: 'button'});
