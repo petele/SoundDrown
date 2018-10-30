@@ -1,3 +1,4 @@
+/* exported gaEvent */
 'use strict';
 
 /**
