@@ -31,6 +31,10 @@
         "String": "string"
       },
       "requireReturnType": true
+    }],
+    "no-warning-comments": [1, {
+      "terms": ["todo", "fixme"],
+      "location": "anywhere"
     }]
   }
 }
