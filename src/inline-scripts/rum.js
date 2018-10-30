@@ -31,16 +31,7 @@ function gaEvent(category, action, label, value, nonInteraction) {
 }
 
 /**
- * Fires the Google Analytics page view
- */
-window.addEventListener('DOMContentLoaded', () => {
-  // eslint-disable-next-line no-undef
-  ga('send', 'pageview', '/');
-});
-
-/**
  * Analytics for window type: browser, standalone, standalone-ios
- * DELAYED - fires after 5 seconds.
  */
 window.addEventListener('load', () => {
   setTimeout(() => {
@@ -53,18 +44,17 @@ window.addEventListener('load', () => {
       return;
     }
     gaEvent('Window Style', 'browser');
-  }, 5000);
+  }, 3100);
 });
 
 /**
- * Performance analytics
- * DELAYED - fires after 3 seconds.
+ * Performance analytics: load & paint
  */
 window.addEventListener('load', () => {
   if ('performance' in window) {
     const pNow = Math.round(performance.now());
+    gaEvent('Performance Metrics', 'window-load', null, pNow);
     setTimeout(() => {
-      gaEvent('Performance Metrics', 'window-load', null, pNow);
       const paintMetrics = performance.getEntriesByType('paint');
       if (paintMetrics && paintMetrics.length > 0) {
         paintMetrics.forEach((entry) => {
@@ -76,11 +66,14 @@ window.addEventListener('load', () => {
     }, 3000);
   }
 });
+
+/**
+ * Performance analytics: GA PageView, DOMContentLoaded
+ */
 window.addEventListener('DOMContentLoaded', () => {
+  window.ga('send', 'pageview', '/');
   if ('performance' in window) {
     const pNow = Math.round(performance.now());
-    setTimeout(() => {
-      gaEvent('Performance Metrics', 'dom-content-loaded', null, pNow);
-    }, 3000);
+    gaEvent('Performance Metrics', 'dom-content-loaded', null, pNow);
   }
 });
