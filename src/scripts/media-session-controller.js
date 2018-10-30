@@ -8,11 +8,10 @@ class MediaSessionController extends HTMLElement {
   constructor() {
     super();
     this._enabled = ('mediaSession' in navigator);
-    // todo
-    // if (!this.enabled) {
-    //   console.log('🔈', 'Media Session not available.');
-    //   return;
-    // }
+    if (!this.enabled) {
+      console.log('🔈', 'Media Session not available.');
+      return;
+    }
     const innerHTML = `
       <style>
         :host {
@@ -24,8 +23,7 @@ class MediaSessionController extends HTMLElement {
     const shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.innerHTML = innerHTML;
     this._audioElement = shadowRoot.querySelector('audio');
-    // todo
-    // this._initMediaSession();
+    this._initMediaSession();
     this.dispatchEvent(new Event('ready'));
   }
   /**

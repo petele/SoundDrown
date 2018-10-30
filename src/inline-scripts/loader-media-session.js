@@ -2,12 +2,11 @@
 'use strict';
 
 window.addEventListener('load', () => {
-  // TODO
-  // const supported = ('mediaSession' in navigator);
-  // if (!supported) {
-  //   console.log('🔈', 'Media Session not available.');
-  //   return;
-  // }
+  const supported = ('mediaSession' in navigator);
+  if (!supported) {
+    console.log('🔈', 'Media Session not available.');
+    return;
+  }
 
   const scriptElem = document.createElement('script');
   scriptElem.src = '/scripts/media-session-controller.js';
