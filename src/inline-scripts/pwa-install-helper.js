@@ -1,3 +1,4 @@
+/* global gaEvent */
 'use strict';
 
 if ('BeforeInstallPromptEvent' in window) {
