@@ -84,6 +84,7 @@ gulp.task('lint', () => {
     'gulpfile.js',
     'src/index.html',
     'src/scripts/*',
+    'src/inline-scripts/*',
   ];
   const config = {
     useEslintrc: true,
