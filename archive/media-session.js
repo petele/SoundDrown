@@ -4,27 +4,22 @@
 class MediaSessionController { // eslint-disable-line no-unused-vars
   /**
    * Create a MediaSession controller.
-   * @param {Object} noises - A object of noise objects.
-   * @param {Object} [opts] - Options used when creating the controller.
-   * @param {string} [opts.selector=audio] - The selector find the
-   * &lt;audio> element.
-   * @param {Function} [opts.gaEvent] - For tracking Google Analytics events.
+   * @param {string} audioSelector - Selector for the Audio HTML element.
    */
-  constructor(noises, opts={}) {
+  constructor(audioSelector='audio') {
     this._enabled = ('mediaSession' in navigator);
-    if (!this._enabled) {
+    if (!this.enabled) {
       console.log('🔈', 'Media Session not available.');
       return;
     }
-    if (opts.gaEvent) {
-      this._gaEvent = opts.gaEvent;
+    this._audioElement = document.querySelector(audioSelector);
+    if (!this._audioElement) {
+      console.error('🔈', 'No audio element.');
+      return;
     }
-    this._noises = noises;
+    this._audioElement.src = '/sounds/silence.mp3';
     this._initMediaSession();
-    this._initAudioElement(opts.selector);
-    if (this._gaEvent) {
-      this._gaEvent('MediaSession', 'enabled');
-    }
+    this._audioElement.dispatchEvent(new Event('media-session-ready'));
   }
   /**
    * Is the media session available?
@@ -54,13 +49,12 @@ class MediaSessionController { // eslint-disable-line no-unused-vars
       return;
     }
     let playing = false;
-    // eslint-disable-next-line guard-for-in
-    for (const key in this._noises) {
-      const noise = this._noises[key];
-      if (noise.playing) {
+    const elems = document.querySelectorAll('.sound-container button');
+    elems.forEach((elem) => {
+      if (elem.getAttribute('aria-checked') === 'true') {
         playing = true;
       }
-    }
+    });
     this._toggleAudioElem(playing);
     this._previousState = null;
     return playing;
@@ -88,20 +82,6 @@ class MediaSessionController { // eslint-disable-line no-unused-vars
     navigator.mediaSession.setActionHandler('pause', (evt) => {
       this._handlePause(evt);
     });
-  }
-  /**
-   * Initializes the audio element.
-   * @private
-   * @param {string} selector - The selector for the audio element.
-   */
-  _initAudioElement(selector='audio') {
-    const audioElem = document.querySelector(selector);
-    if (audioElem) {
-      audioElem.src = '/sounds/silence.mp3';
-      this._audioElement = audioElem;
-      return;
-    }
-    console.error('🔈', 'No audio element.');
   }
   /**
    * Play or Pause the &lt;audio> player.

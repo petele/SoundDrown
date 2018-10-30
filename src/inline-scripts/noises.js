@@ -1,3 +1,4 @@
+/* global soundDrownApp */
 /* exported WhiteNoise, PinkNoise, BrownNoise, BinauralTone */
 'use strict';
 
@@ -8,25 +9,17 @@ class Noise {
   /**
    * Create a Noise object.
    * @param {string} name - Name of the noise generator.
-   * @param {Object} [opts] - Options used when creating generator.
-   * @param {number} [opts.bufferSize=1024] - Size of WebAudio buffer.
-   * @param {Button} [opts.button] - Button element that toggles the noise.
-   * @param {Function} [opts.gaEvent] - For tracking Google Analytics events.
+   * @param {Button} button - HTMLButton that toggles the sound.
+   * @param {Object} [opts={}] - Optional parameters.
    */
-  constructor(name, opts = {}) {
+  constructor(name, button, opts={}) {
     this._name = name;
+    if (!button) {
+      throw new Error('Button not provided.');
+    }
     this._playing = false;
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    this._audioContext = new AudioContext();
-    this._noiseGenerator = this._getGenerator(opts);
-    this._noiseGenerator.connect(this._audioContext.destination);
-    if (opts.button) {
-      this._button = opts.button;
-    }
-    if (opts.gaEvent) {
-      this._gaEvent = opts.gaEvent;
-      this._gaEvent('Noise', 'initialized', this.name);
-    }
+    this._button = button;
+    this._options = opts;
   }
   /**
    * Name of the noise generator.
@@ -43,6 +36,21 @@ class Noise {
    */
   get playing() {
     return !!this._playing;
+  }
+  /**
+   * Creates the audio context and sets up the appropriate nodes.
+   */
+  _setup() {
+    this._audioContext = soundDrownApp.audioContext;
+    if (!this._audioContext) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioContext = new AudioContext();
+      this._audioContext = audioContext;
+      soundDrownApp.audioContext = audioContext;
+    }
+    this._noiseGenerator = this._getGenerator();
+    const opts = {detail: {name: this.name}};
+    this._button.dispatchEvent(new CustomEvent('initialized', opts));
   }
   /**
    * Create & return the noise generator.
@@ -86,16 +94,17 @@ class Noise {
     if (this.playing) {
       return true;
     }
+    if (!this._audioContext) {
+      this._setup();
+    }
+    this._noiseGenerator.connect(this._audioContext.destination);
     this._audioContext.resume();
     this._startedAt = Date.now();
     this._playing = true;
-    if (this._button) {
-      this._button.classList.toggle('on', true);
-      this._button.setAttribute('aria-checked', 'true');
-    }
-    if (this._gaEvent) {
-      this._gaEvent('Noise', 'start', this.name);
-    }
+    this._button.classList.toggle('on', true);
+    this._button.setAttribute('aria-checked', 'true');
+    const opts = {detail: {name: this.name}};
+    this._button.dispatchEvent(new CustomEvent('start', opts));
     return true;
   }
   /**
@@ -106,16 +115,17 @@ class Noise {
     if (!this.playing) {
       return false;
     }
-    this._audioContext.suspend();
+    this._noiseGenerator.disconnect(this._audioContext.destination);
     this._playing = false;
-    if (this._button) {
-      this._button.classList.toggle('on', false);
-      this._button.setAttribute('aria-checked', 'false');
-    }
-    if (this._gaEvent) {
-      const duration = Math.round((Date.now() - this._startedAt) / 1000);
-      this._gaEvent('Noise', 'duration', this.name, duration);
-    }
+    this._button.classList.toggle('on', false);
+    this._button.setAttribute('aria-checked', 'false');
+    const opts = {
+      detail: {
+        name: this.name,
+        duration: Math.round((Date.now() - this._startedAt) / 1000),
+      },
+    };
+    this._button.dispatchEvent(new CustomEvent('stop', opts));
     return false;
   }
 }
@@ -127,21 +137,20 @@ class Noise {
 class WhiteNoise extends Noise {
   /**
    * Create a White Noise object.
-   * @param {Object} [opts={}] - See {@link Noise}
+   * @param {Button} button - HTMLButton that toggles the sound.
    */
-  constructor(opts = {}) {
-    super('WhiteNoise', opts);
+  constructor(button) {
+    super('WhiteNoise', button);
   }
   /**
    * Creates the web audio node.
    * @override
-   * @param {Object} [opts={}] - See {@link Noise}
    * @return {ScriptProcessorNode} The newly created node.
    * @see https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode
    */
-  _getGenerator(opts = {}) {
+  _getGenerator() {
     const context = this._audioContext;
-    const bufferSize = opts.bufferSize || 1024;
+    const bufferSize = 1024;
     const noise = context.createScriptProcessor(bufferSize, 1, 1);
     noise.addEventListener('audioprocess', (e) => {
       const output = e.outputBuffer.getChannelData(0);
@@ -160,21 +169,20 @@ class WhiteNoise extends Noise {
 class PinkNoise extends Noise {
   /**
    * Create a Pink Noise object.
-   * @param {Object} [opts={}] - See {@link Noise}
+   * @param {Button} button - HTMLButton that toggles the sound.
    */
-  constructor(opts = {}) {
-    super('PinkNoise', opts);
+  constructor(button) {
+    super('PinkNoise', button);
   }
   /**
    * Creates the web audio node.
    * @override
-   * @param {Object} [opts={}] - See {@link Noise}
    * @return {ScriptProcessorNode} The newly created node.
    * @see https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode
    */
-  _getGenerator(opts = {}) {
+  _getGenerator() {
     const context = this._audioContext;
-    const bufferSize = opts.bufferSize || 1024;
+    const bufferSize = 1024;
     const noise = context.createScriptProcessor(bufferSize, 1, 1);
     let b0 = 0;
     let b1 = 0;
@@ -208,21 +216,20 @@ class PinkNoise extends Noise {
 class BrownNoise extends Noise {
   /**
    * Create a Brown Noise object.
-   * @param {Object} [opts={}] - See {@link Noise}
+   * @param {Button} button - HTMLButton that toggles the sound.
    */
-  constructor(opts = {}) {
-    super('BrownNoise', opts);
+  constructor(button) {
+    super('BrownNoise', button);
   }
   /**
    * Creates the web audio node.
    * @override
-   * @param {Object} [opts={}] - See {@link Noise}
    * @return {AudioNode} The newly created node.
    * @see https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode
    */
-  _getGenerator(opts = {}) {
+  _getGenerator() {
     const context = this._audioContext;
-    const bufferSize = opts.bufferSize || 1024;
+    const bufferSize = 1024;
     const noise = context.createScriptProcessor(bufferSize, 1, 1);
     let lastOut = 0.0;
     noise.addEventListener('audioprocess', (e) => {
@@ -244,15 +251,15 @@ class BrownNoise extends Noise {
 class BinauralTone extends Noise {
   /**
    * Create a binaural tone object.
-   * @param {Object} [opts={}] - See {@link Noise} for base options.
+   * @param {Button} button - HTMLButton that toggles the sound.
+   * @param {Object} [opts].
    * @param {number} [opts.frequency=440] - The primary frequency (Hz) to play.
-   * @param {number} [opts.freqDiff=5] - The differential to apply to each
-   * channel.
-   * @param {string} [opts.waveType=sine] - The shape
-   * ({@linkcode BinauralTone#WAVE_FORMS|WAVE_FORM}) of the oscillator wave.
+   * @param {number} [opts.freqDiff=5] - The frequency differential.
+   * @param {string} [opts.waveType=sine] - The wave form shape
+   * ({@linkcode BinauralTone#WAVE_FORMS|WAVE_FORM}).
    */
-  constructor(opts = {}) {
-    super('BinauralTone', opts);
+  constructor(button, opts={}) {
+    super('BinauralTone', button, opts);
   }
   /**
    * Enum for the different wave forms
@@ -270,15 +277,14 @@ class BinauralTone extends Noise {
   /**
    * Creates the web audio node.
    * @override
-   * @param {Object} [opts]
    * @return {ChannelMergerNode} The newly created node.
    * @see https://developer.mozilla.org/en-US/docs/Web/API/ChannelMergerNode
    */
-  _getGenerator(opts = {}) {
+  _getGenerator() {
     // Set the initial defaults
-    this._freqDiff = opts.freqDiff || 5;
-    this._frequency = opts.frequency || 440;
-    this._waveType = opts.waveType || this.WAVE_FORMS.SINE;
+    this._freqDiff = this._options.freqDiff || 5;
+    this._frequency = this._options.frequency || 440;
+    this._waveType = this._options.waveType || this.WAVE_FORMS.SINE;
 
     // Hook up the nodes
     const context = this._audioContext;
