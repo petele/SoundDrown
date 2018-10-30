@@ -1,3 +1,4 @@
+/* global gaEvent */
 'use strict';
 
 window.addEventListener('load', () => {
