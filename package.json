@@ -17,7 +17,6 @@
     "fs-extra": "^7.0.0",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^6.0.0",
-    "gulp-babel": "^8.0.0",
     "gulp-connect": "^5.6.1",
     "gulp-copy": "^4.0.0",
     "gulp-csso": "^3.0.1",
@@ -26,8 +25,7 @@
     "gulp-inline-source": "^3.2.0",
     "gulp-jsdoc3": "^2.0.0",
     "gulp-replace": "^1.0.0",
-    "gulp-sourcemaps": "^2.6.4",
-    "gulp-uglify": "^3.0.1",
+    "gulp-terser": "^1.1.5",
     "run-sequence": "^2.2.1",
     "semver": "^5.5.1",
     "workbox-build": "^3.6.2"

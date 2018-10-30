@@ -8,23 +8,31 @@ const fs = require('fs-extra');
 const semver = require('semver');
 const csso = require('gulp-csso');
 const copy = require('gulp-copy');
-const babel = require('gulp-babel');
 const jsdoc = require('gulp-jsdoc3');
+const terser = require('gulp-terser');
 const eslint = require('gulp-eslint');
-const uglify = require('gulp-uglify');
 const connect = require('gulp-connect');
 const htmlmin = require('gulp-htmlmin');
 const replace = require('gulp-replace');
 const workbox = require('workbox-build');
 const firebase = require('firebase-tools');
 const runSequence = require('run-sequence');
-const sourcemaps = require('gulp-sourcemaps');
 const autoprefixer = require('gulp-autoprefixer');
 const inlinesource = require('gulp-inline-source');
 
 const SRC_DIR = 'src';
 const DEST_DIR = 'build';
 const TEMP_DIR = '.tmp';
+const TERSER_OPTS = {
+  compress: {
+    drop_console: true,
+  },
+  output: {
+    beautify: false,
+    max_line_len: 120,
+    indent_level: 2,
+  },
+};
 
 /** ***************************************************************************
  * Bump Version Number
@@ -153,44 +161,20 @@ gulp.task('css-build', () => {
     sourceMap: true,
   };
   return gulp.src(`${SRC_DIR}/styles/styles.css`)
-      .pipe(sourcemaps.init())
       .pipe(autoprefixer(autoprefixOpts))
       .pipe(csso(cssoOpts))
-      .pipe(sourcemaps.write(`../maps/`))
       .pipe(gulp.dest(`${TEMP_DIR}/styles/`));
 });
 
 gulp.task('js-inline', () => {
-  const uglifyOpts = {
-    compress: {
-      drop_console: true,
-      warnings: true,
-    },
-  };
   return gulp.src(`${SRC_DIR}/inline-scripts/*.js`)
-      .pipe(sourcemaps.init())
-      .pipe(babel({
-        presets: ['@babel/env'],
-      }))
-      .pipe(uglify(uglifyOpts))
-      .pipe(sourcemaps.write(`../maps/`))
+      .pipe(terser(TERSER_OPTS))
       .pipe(gulp.dest(`${TEMP_DIR}/inline-scripts`));
 });
 
 gulp.task('js-script', () => {
-  const uglifyOpts = {
-    compress: {
-      drop_console: true,
-      warnings: true,
-    },
-  };
   return gulp.src(`${SRC_DIR}/scripts/*.js`)
-      .pipe(sourcemaps.init())
-      .pipe(babel({
-        presets: ['@babel/env'],
-      }))
-      .pipe(uglify(uglifyOpts))
-      .pipe(sourcemaps.write(`../maps/`))
+      .pipe(terser(TERSER_OPTS))
       .pipe(gulp.dest(`${TEMP_DIR}/scripts`));
 });
 
@@ -208,7 +192,7 @@ gulp.task('html-copy', () => {
 
 gulp.task('html-build', ['html-copy', 'css-build', 'js-build'], () => {
   const inlineOpts = {
-    compress: true,
+    compress: false,
     pretty: false,
   };
   const htmlMinOpts = {
@@ -221,12 +205,10 @@ gulp.task('html-build', ['html-copy', 'css-build', 'js-build'], () => {
   const buildDate = new Date().toISOString();
   const packageJSON = fs.readJsonSync('package.json');
   return gulp.src(`${TEMP_DIR}/index.html`)
-      .pipe(sourcemaps.init())
       .pipe(replace('[[BUILD_DATE]]', buildDate))
       .pipe(replace('[[VERSION]]', packageJSON.version))
-      .pipe(htmlmin(htmlMinOpts))
       .pipe(inlinesource(inlineOpts))
-      .pipe(sourcemaps.write(`maps/`))
+      .pipe(htmlmin(htmlMinOpts))
       .pipe(gulp.dest(TEMP_DIR));
 });
 
