@@ -42,12 +42,6 @@ class Noise {
    */
   _setup() {
     this._audioContext = soundDrownApp.audioContext;
-    if (!this._audioContext) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      const audioContext = new AudioContext();
-      this._audioContext = audioContext;
-      soundDrownApp.audioContext = audioContext;
-    }
     this._noiseGenerator = this._getGenerator();
     const opts = {detail: {name: this.name}};
     this._button.dispatchEvent(new CustomEvent('initialized', opts));

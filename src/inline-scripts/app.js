@@ -56,6 +56,23 @@ class SoundDrownApp {
     button.removeAttribute('disabled');
   }
   /**
+   * Gets the current audio context
+   * @readonly
+   * @return {AudioContext}
+   */
+  get audioContext() {
+    if (this._audioContext) {
+      return this._audioContext;
+    }
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    this._audioContext = new AudioContext();
+    if ('performance' in window) {
+      const pNow = Math.round(performance.now());
+      gaEvent('Performance Metrics', 'audio-context-created', null, pNow);
+    }
+    return this._audioContext;
+  }
+  /**
    * Stops all noises from playing.
    */
   stopAll() {
