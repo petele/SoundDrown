@@ -80,7 +80,114 @@ class IOSInstallButton extends HTMLElement {
         this.setAttribute('disabled', '');
       }, 1000);
     });
+  }
+  /**
+   * Connected callback
+   */
+  connectedCallback() {
     this.removeAttribute('disabled');
+    // eslint-disable-next-line compat/compat
+    fetch('/manifest.json')
+        .then((resp) => resp.json())
+        .then((manifest) => {
+          const appName = manifest.name;
+          this.innerText = appName;
+          const prefix = 'apple-mobile-web-app';
+          this._addMetaTag(`${prefix}-title`, appName);
+          this._addMetaTag(`${prefix}-capable`, 'yes');
+          this._addMetaTag(`${prefix}-status-bar-style`, 'black-translucent');
+          let largestIcon = {size: 0};
+          const icons = manifest.icons || [];
+          icons.forEach((icon) => {
+            const opts = {
+              href: icon.src,
+              sizes: icon.sizes,
+            };
+            this._addLinkTag('apple-touch-icon', opts);
+            const size = parseInt(icon.sizes.match(/\d+/)[0]);
+            if (size > 192) {
+              return;
+            }
+            if (size > largestIcon.size) {
+              largestIcon.size = size;
+              largestIcon.url = icon.src;
+            }
+          });
+          if (largestIcon.url) {
+            const splashText = appName;
+            const splashIcon = largestIcon.url;
+            const splashFg = 'white';
+            const splashBg = manifest.theme_color;
+            this._addSplash(splashText, splashIcon, splashFg, splashBg);
+          }
+        });
+  }
+  /**
+   * Adds a splash screen to the app.
+   * @param {string} appName - Name of the app.
+   * @param {string} iconURL - Path the the icon image.
+   * @param {string} fgColor - Color to use for the text.
+   * @param {string} bgColor - Color to use for the splash screen background.
+   */
+  _addSplash(appName, iconURL, fgColor, bgColor) {
+    const icon = document.createElement('img');
+    icon.src = iconURL;
+    icon.onload = function() {
+      // Create the canvas
+      const dpr = window.devicePixelRatio;
+      const width = window.screen.width;
+      const height = window.screen.height;
+      const canvas = document.createElement('canvas');
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      // Fill it with the bgColor
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, width, height);
+      ctx.translate(width / 2, (height - 32) / 2);
+      // Create the text for the app name
+      ctx.font = '24px HelveticaNeue-CondensedBold';
+      ctx.fillStyle = fgColor;
+      const textWidth = ctx.measureText(appName).width;
+      // Draw the icon
+      const icWidth = icon.width / dpr;
+      const icHeight = icon.height / dpr;
+      ctx.drawImage(icon, icWidth / -2, icHeight / -2, icWidth, icHeight);
+      // Draw the text for the app name
+      ctx.translate(0, icHeight / 2 + 32);
+      ctx.fillText(appName, textWidth / -2, 0);
+      // Create and add the link tag to the page
+      const linkTag = document.createElement('link');
+      linkTag.rel = 'apple-touch-startup-image';
+      linkTag.href = ctx.canvas.toDataURL();
+      document.head.append(linkTag);
+    };
+  }
+  /**
+   * Helper function to add a meta tag to the document head.
+   * @param {string} name - Name of the meta tag.
+   * @param {string} content - Content of the meta tag.
+   */
+  _addMetaTag(name, content) {
+    const tag = document.createElement('meta');
+    tag.name = name;
+    tag.content = content;
+    document.head.append(tag);
+  }
+  /**
+   * Helper function to add a link tag to the document head.
+   * @param {string} rel
+   * @param {Object} props
+   */
+  _addLinkTag(rel, props) {
+    const tag = document.createElement('link');
+    tag.rel = rel;
+    // eslint-disable-next-line guard-for-in
+    for (const prop in props) {
+      tag.setAttribute(prop, props[prop]);
+    }
+    document.head.append(tag);
   }
   /**
    * Show or hide the banner

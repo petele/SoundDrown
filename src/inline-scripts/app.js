@@ -19,6 +19,7 @@ class SoundDrownApp {
     });
 
     if ('performance' in window) {
+      // eslint-disable-next-line compat/compat
       const pNow = Math.round(performance.now());
       gaEvent('Performance Metrics', 'sounds-ready', null, pNow, true);
     }
@@ -67,6 +68,7 @@ class SoundDrownApp {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     this._audioContext = new AudioContext();
     if ('performance' in window) {
+      // eslint-disable-next-line compat/compat
       const pNow = Math.round(performance.now());
       gaEvent('Performance Metrics', 'audio-context-created', null, pNow);
     }

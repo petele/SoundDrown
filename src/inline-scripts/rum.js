@@ -53,6 +53,7 @@ window.addEventListener('load', () => {
  */
 window.addEventListener('load', () => {
   if ('performance' in window) {
+    // eslint-disable-next-line compat/compat
     const pNow = Math.round(performance.now());
     gaEvent('Performance Metrics', 'window-load', null, pNow);
     setTimeout(() => {
@@ -74,7 +75,13 @@ window.addEventListener('load', () => {
 window.addEventListener('DOMContentLoaded', () => {
   window.ga('send', 'pageview', '/');
   if ('performance' in window) {
+    // eslint-disable-next-line compat/compat
     const pNow = Math.round(performance.now());
     gaEvent('Performance Metrics', 'dom-content-loaded', null, pNow);
   }
+});
+
+document.addEventListener('visibilitychange', (e) => {
+  const state = document.hidden === true ? 'hidden' : 'visible';
+  gaEvent('Page Visibility', state);
 });
