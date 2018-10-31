@@ -80,3 +80,8 @@ window.addEventListener('DOMContentLoaded', () => {
     gaEvent('Performance Metrics', 'dom-content-loaded', null, pNow);
   }
 });
+
+document.addEventListener('visibilitychange', (e) => {
+  const state = document.hidden === true ? 'hidden' : 'visible';
+  gaEvent('Page Visibility', state);
+});
