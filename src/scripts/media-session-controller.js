@@ -35,10 +35,10 @@ class MediaSessionController extends HTMLElement {
       title: 'SoundDrown',
       album: 'White Noise Generator',
       artwork: [
-        {src: '/images/48.png', sizes: '48x48', type: 'image/png'},
-        {src: '/images/192.png', sizes: '192x192', type: 'image/png'},
-        {src: '/images/256.png', sizes: '256x256', type: 'image/png'},
-        {src: '/images/512.png', sizes: '512x412', type: 'image/png'},
+        {src: '/icons/48.png', sizes: '48x48', type: 'image/png'},
+        {src: '/icons/192.png', sizes: '192x192', type: 'image/png'},
+        {src: '/icons/256.png', sizes: '256x256', type: 'image/png'},
+        {src: '/icons/512.png', sizes: '512x412', type: 'image/png'},
       ],
     };
     // eslint-disable-next-line no-undef

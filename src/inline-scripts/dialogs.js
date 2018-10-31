@@ -26,7 +26,7 @@ class Dialog {
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
   const aboutDialog = new Dialog('dialogAbout');
   document.getElementById('butAbout').addEventListener('click', () => {
     aboutDialog.show(true);

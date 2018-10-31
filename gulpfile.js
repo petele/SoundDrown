@@ -124,9 +124,6 @@ gulp.task('generate-service-worker', () => {
     globPatterns: [
       '**/*.{html,js,png,ico,mp3,json}',
     ],
-    globIgnores: [
-      'icons/**/*',
-    ],
     swDest: `${DEST_DIR}/service-worker.js`,
     clientsClaim: true,
     skipWaiting: true,
@@ -199,7 +196,7 @@ gulp.task('html-build', ['html-copy', 'css-build', 'js-build'], () => {
     collapseWhitespace: true,
     maxLineLength: 80,
     minifyCSS: true,
-    minifyJS: true,
+    minifyJS: false,
     removeComments: true,
   };
   const buildDate = new Date().toISOString();

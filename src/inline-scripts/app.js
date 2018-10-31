@@ -14,14 +14,14 @@ class SoundDrownApp {
     this._setupNoise('butBrown', BrownNoise);
     this._setupNoise('butBinaural', BinauralTone);
 
+    window.addEventListener('unload', () => {
+      this.stopAll();
+    });
+
     if ('performance' in window) {
       const pNow = Math.round(performance.now());
       gaEvent('Performance Metrics', 'sounds-ready', null, pNow, true);
     }
-
-    window.addEventListener('unload', () => {
-      this.stopAll();
-    });
   }
   /**
    * Helper function to set up a noise
