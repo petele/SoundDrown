@@ -8,9 +8,10 @@
     "es6": true
   },
   "plugins": [
-    "html"
+    "html", "compat"
   ],
   "rules": {
+    "compat/compat": "warn",
     "require-jsdoc": "error",
     "no-console": 0,
     "strict": ["error", "global"],
@@ -32,7 +33,7 @@
       },
       "requireReturnType": true
     }],
-    "no-warning-comments": [1, {
+    "no-warning-comments": ["warn", {
       "terms": ["todo", "fixme"],
       "location": "anywhere"
     }]
