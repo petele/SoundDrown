@@ -1,7 +1,8 @@
 /* global gaEvent */
 'use strict';
 
-if ('BeforeInstallPromptEvent' in window) {
+// Verify customElements and beforeInstallPromptEvent is supported.
+if (('customElements' in window) && ('BeforeInstallPromptEvent' in window)) {
   const button = document.getElementById('butPWAInstall');
   button.addEventListener('pwa-install', (e) => {
     const d = e.detail;

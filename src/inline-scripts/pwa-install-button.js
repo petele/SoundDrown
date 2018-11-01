@@ -79,5 +79,9 @@ class PWAInstallButton extends HTMLButtonElement {
   }
 }
 
-window.customElements.define(
-    'pwa-install-button', PWAInstallButton, {extends: 'button'});
+if ('customElements' in window) {
+  const name = 'pwa-install-button';
+  const opts = {extends: 'button'};
+  // eslint-disable-next-line compat/compat
+  window.customElements.define(name, PWAInstallButton, opts);
+}
