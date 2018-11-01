@@ -4,7 +4,7 @@
 if ('BeforeInstallPromptEvent' in window) {
   const button = document.getElementById('butPWAInstall');
   button.addEventListener('pwa-install', (e) => {
-    const detail = e.detail;
-    gaEvent('PWAInstall', detail.action, detail.label, detail.value);
+    const d = e.detail;
+    gaEvent('PWAInstall', d.action, d.label, d.value, d.nonInteraction);
   });
 }

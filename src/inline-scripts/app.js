@@ -1,4 +1,4 @@
-/* global gaEvent, WhiteNoise, PinkNoise, BrownNoise, BinauralTone */
+/* global gaEvent, gaTiming, WhiteNoise, PinkNoise, BrownNoise, BinauralTone */
 'use strict';
 
 /**
@@ -21,7 +21,7 @@ class SoundDrownApp {
     if ('performance' in window) {
       // eslint-disable-next-line compat/compat
       const pNow = Math.round(performance.now());
-      gaEvent('Performance Metrics', 'sounds-ready', null, pNow, true);
+      gaTiming('Start', 'sound-ready', pNow);
     }
   }
   /**
@@ -70,7 +70,7 @@ class SoundDrownApp {
     if ('performance' in window) {
       // eslint-disable-next-line compat/compat
       const pNow = Math.round(performance.now());
-      gaEvent('Performance Metrics', 'audio-context-created', null, pNow);
+      gaTiming('First Noise', 'audio-context-created', pNow);
     }
     return this._audioContext;
   }

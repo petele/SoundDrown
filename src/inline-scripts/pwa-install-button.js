@@ -13,7 +13,7 @@ class PWAInstallButton extends HTMLButtonElement {
     window.addEventListener('beforeinstallprompt', (evt) => {
       this._deferredEvent = evt;
       this._showButton(true);
-      this._fireEvent('available');
+      this._fireEvent('available', null, null, true);
     });
     window.addEventListener('appinstalled', () => {
       this._deferredEvent = null;
@@ -38,12 +38,13 @@ class PWAInstallButton extends HTMLButtonElement {
    * @param {string} action - The type of interaction.
    * @param {string} [label] - Useful for categorizing events.
    * @param {number} [value] - A numeric value associated with the event.
+   * @param {boolean} [nonInteraction=false] - Indicates a non-interaction evt.
    */
-  _fireEvent(action, label, value) {
+  _fireEvent(action, label, value, nonInteraction) {
     const opts = {
       bubbles: true,
       composed: true,
-      detail: {action, label, value},
+      detail: {action, label, value, nonInteraction},
     };
     this.dispatchEvent(new CustomEvent('pwa-install', opts));
   }

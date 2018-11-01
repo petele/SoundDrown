@@ -19,7 +19,7 @@ window.addEventListener('load', () => {
   if (!RE_APPLE_DEVICE.test(ua)) {
     return;
   }
-  gaEvent('IOSInstall', 'available');
+  gaEvent('IOSInstall', 'available', null, null, true);
 
   const scriptElem = document.createElement('script');
   scriptElem.src = '/scripts/ios-install-button.js';

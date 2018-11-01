@@ -22,6 +22,6 @@ window.addEventListener('load', () => {
     });
     soundDrownApp.mediaSessionController = msController;
     document.body.append(msController);
-    gaEvent('MediaSession', 'enabled');
+    gaEvent('MediaSession', 'enabled', null, null, true);
   });
 });
