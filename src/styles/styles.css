@@ -59,6 +59,14 @@ header h1 {
   margin: 0;
 }
 
+header #butShare {
+  background-color: transparent;
+  border: none;
+  padding: 24px;
+  position: absolute;
+  right: 0;
+}
+
 #dialogContainer {
   align-items: center;
   display: flex;
