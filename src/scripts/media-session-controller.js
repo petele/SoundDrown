@@ -18,7 +18,7 @@ class MediaSessionController extends HTMLElement {
           display: none;
         }
       </style>
-      <audio controls loop src="/sounds/silence.mp3"></audio>
+      <audio controls preload="auto" loop src="/sounds/silence.mp3"></audio>
     `;
     const shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.innerHTML = innerHTML;
