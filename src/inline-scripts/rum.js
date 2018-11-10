@@ -88,12 +88,15 @@ window.addEventListener('load', () => {
  * Performance analytics: GA PageView, DOMContentLoaded
  */
 window.addEventListener('DOMContentLoaded', () => {
-  window.ga('send', 'pageview', '/');
   if ('performance' in window) {
     // eslint-disable-next-line compat/compat
     const pNow = Math.round(performance.now());
     gaTiming('Start', 'dom-content-loaded', pNow);
   }
+  const gaScript = document.createElement('script');
+  gaScript.src = 'https://www.google-analytics.com/analytics.js';
+  document.head.appendChild(gaScript);
+  window.ga('send', 'pageview', '/');
 });
 
 document.addEventListener('visibilitychange', (e) => {
