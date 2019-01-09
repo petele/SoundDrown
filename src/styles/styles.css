@@ -23,6 +23,7 @@ html {
   --app-button-off: var(--gray-50);
   --app-button-on: var(--gray-50);
   --app-button-on-bg: var(--blue-gray-700);
+  overscroll-behavior-y: none;
 }
 
 body, html {
