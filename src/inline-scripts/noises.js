@@ -47,6 +47,24 @@ class Noise {
     this._button.dispatchEvent(new CustomEvent('initialized', opts));
   }
   /**
+   * Gets buffer size from query string.
+   * @private
+   * @return {Number}
+   */
+  _getBufferSize() {
+    let result = 10;
+    const urlParams = new URLSearchParams(window.location.search);
+    const bufferSize = urlParams.get('buffer');
+    if (bufferSize) {
+      result += parseInt(bufferSize, 10);
+    }
+    result = Math.pow(2, result);
+    result = result > 16384 ? 16384 : result;
+    result = result < 256 ? 256 : result;
+    console.log('🎛️', 'Buffer Size', result);
+    return result;
+  }
+  /**
    * Create & return the noise generator.
    * @private
    * @abstract
@@ -144,7 +162,7 @@ class WhiteNoise extends Noise {
    */
   _getGenerator() {
     const context = this._audioContext;
-    const bufferSize = 1024;
+    const bufferSize = this._getBufferSize();
     const noise = context.createScriptProcessor(bufferSize, 1, 1);
     noise.addEventListener('audioprocess', (e) => {
       const output = e.outputBuffer.getChannelData(0);
@@ -176,7 +194,7 @@ class PinkNoise extends Noise {
    */
   _getGenerator() {
     const context = this._audioContext;
-    const bufferSize = 1024;
+    const bufferSize = this._getBufferSize();
     const noise = context.createScriptProcessor(bufferSize, 1, 1);
     let b0 = 0;
     let b1 = 0;
@@ -223,7 +241,7 @@ class BrownNoise extends Noise {
    */
   _getGenerator() {
     const context = this._audioContext;
-    const bufferSize = 1024;
+    const bufferSize = this._getBufferSize();
     const noise = context.createScriptProcessor(bufferSize, 1, 1);
     let lastOut = 0.0;
     noise.addEventListener('audioprocess', (e) => {
@@ -246,7 +264,7 @@ class BinauralTone extends Noise {
   /**
    * Create a binaural tone object.
    * @param {Button} button - HTMLButton that toggles the sound.
-   * @param {Object} [opts].
+   * @param {Object} [opts]
    * @param {number} [opts.frequency=440] - The primary frequency (Hz) to play.
    * @param {number} [opts.freqDiff=5] - The frequency differential.
    * @param {string} [opts.waveType=sine] - The wave form shape
