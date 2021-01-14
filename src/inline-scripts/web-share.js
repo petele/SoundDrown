@@ -11,7 +11,7 @@ window.addEventListener('load', () => {
     const shareOpts = {
       title: 'SoundDrown',
       text:
-        'Check out SoundDrown, a a simple, easy to use, white noise ' +
+        'Check out SoundDrown, a simple, easy to use, white noise ' +
         'generator. Use it to drown out annoying noises, friends, ' +
         'co-workers, family, or anything else.',
       url: 'https://SoundDrown.app',
